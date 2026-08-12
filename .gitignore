@@ -1,0 +1,15 @@
+# Public site repo for Archiwum Wielkiej Apostazji — this is THE repo that
+# gets published on GitHub Pages, so everything in it is meant to be public
+# by definition. Kept as an explicit allowlist for consistency with the
+# sibling awa-desk / archiwum(-admin) repos, not because anything here is
+# sensitive.
+*
+
+!.gitignore
+!*.md
+!index.html
+!assets/
+!assets/**
+!data/
+!data/**
+!CNAME

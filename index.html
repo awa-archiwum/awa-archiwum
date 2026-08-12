@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Archiwum Wielkiej Apostazji</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#15120d; --surface:#1f1a13; --surface2:#2a2318; --line:#3d3524; --line-bright:#5a4d31;
+  --gold:#c9a961; --gold-bright:#e6c988; --gold-dim:#8b7442;
+  --ink:#ece6d6; --muted:#a89878; --wine:#7a2e26; --wine-bright:#a3453a;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;}
+#shell{display:flex;height:100vh;}
+#nav{width:210px;min-width:210px;background:linear-gradient(180deg,#1a160f,#100d09);color:var(--ink);display:flex;flex-direction:column;padding:18px 0;border-right:1px solid var(--line);}
+.nav-logo-row{display:flex;align-items:center;gap:10px;padding:0 18px 10px;}
+.nav-seal{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
+.nav-logo{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--gold-bright);}
+.nav-sub{padding:0 18px 14px;font-size:10px;color:var(--muted);border-bottom:1px solid var(--line);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase;}
+.nav-item{padding:10px 18px;font-size:13px;cursor:pointer;opacity:.78;border-left:3px solid transparent;color:var(--ink);}
+.nav-item:hover{background:rgba(201,169,97,.08);opacity:1;}
+.nav-item.active{opacity:1;border-left-color:var(--gold);background:rgba(201,169,97,.12);font-weight:600;color:var(--gold-bright);}
+#content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+#topbar{display:flex;align-items:center;gap:14px;padding:10px 22px;border-bottom:1px solid var(--line);background:var(--surface);}
+#topbar h2{font-family:'Fraunces',serif;font-size:16px;margin:0;font-weight:600;color:var(--gold-bright);}
+.spacer{flex:1;}
+.module{flex:1;overflow:auto;padding:26px 32px;display:none;max-width:860px;}
+.module.active{display:block;}
+.btn{border:1px solid var(--line-bright);background:var(--surface2);color:var(--ink);padding:7px 13px;border-radius:5px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;text-decoration:none;display:inline-block;}
+.btn:hover{border-color:var(--gold);color:var(--gold-bright);}
+h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:var(--gold-bright);letter-spacing:.01em;}
+.pagesub{color:var(--muted);font-size:13px;margin:0 0 20px;line-height:1.5;}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.5;}
+.card{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:16px 18px;}
+
+/* hero (strona startowa) */
+.hero{position:relative;border-radius:10px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line-bright);}
+.hero img{width:100%;height:auto;display:block;max-height:360px;object-fit:cover;}
+
+/* archiwalne elementy */
+.sygnatura{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-dim);letter-spacing:.05em;}
+.breadcrumb{font-size:11.5px;color:var(--muted);margin-bottom:14px;font-family:'JetBrains Mono',monospace;}
+.breadcrumb span{cursor:pointer;}
+.breadcrumb span:hover{color:var(--gold-bright);}
+.zespol-group{margin-bottom:22px;}
+.zespol-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--gold-bright);margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:6px;}
+.article-row{padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer;}
+.article-row:hover .article-title{color:var(--gold-bright);}
+.article-title{font-family:'Fraunces',serif;font-size:14.5px;color:var(--ink);}
+.article-meta{font-size:11px;color:var(--muted);margin-top:2px;}
+.keyword-tag{display:inline-block;background:var(--surface2);border:1px solid var(--line-bright);color:var(--gold-dim);font-size:10.5px;padding:2px 8px;border-radius:10px;margin:0 4px 4px 0;font-family:'JetBrains Mono',monospace;cursor:pointer;}
+.keyword-tag:hover{background:var(--gold);color:#20180c;border-color:var(--gold);}
+
+/* indeks A-Z */
+.az-letter{font-family:'Fraunces',serif;font-size:20px;color:var(--wine-bright);margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.az-term{padding:5px 0;font-size:13.5px;cursor:pointer;color:var(--ink);}
+.az-term:hover{color:var(--gold-bright);}
+.az-term .az-count{color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
+
+/* widok artykułu */
+.art-seal-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
+.art-seal{width:30px;height:30px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
+.art-body{font-family:'Fraunces',serif;font-size:15.5px;line-height:1.7;color:var(--ink);}
+.art-body blockquote{border-left:3px solid var(--gold);padding-left:14px;font-style:italic;color:var(--muted);margin:0 0 1em;}
+.art-body sup{color:var(--wine-bright);}
+.art-footnotes,.art-biblio{font-size:13px;color:var(--ink);margin-top:20px;}
+.art-footnotes h3,.art-biblio h3{font-family:'Fraunces',serif;font-size:15px;color:var(--gold-bright);}
+.cite-box{background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:20px;color:var(--muted);}
+
+/* mapa pojęć */
+#graphSvg{width:100%;height:520px;background:var(--surface);border:1px solid var(--line);border-radius:8px;}
+.graph-kw-label{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--gold-bright);cursor:pointer;}
+.graph-art-label{font-family:'Fraunces',serif;font-size:10.5px;fill:var(--ink);cursor:pointer;}
+
+/* książki */
+.book-card{display:flex;gap:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;margin-bottom:12px;}
+.book-cover{width:76px;height:108px;min-width:76px;border-radius:4px;object-fit:cover;background:var(--surface2);border:1px solid var(--line-bright);box-shadow:0 3px 10px rgba(0,0,0,.35);}
+.book-cover-placeholder{width:76px;height:108px;min-width:76px;border-radius:4px;background:linear-gradient(160deg,var(--surface2),var(--bg));border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;color:var(--gold-dim);font-size:11px;text-align:center;padding:6px;}
+.book-title{font-family:'Fraunces',serif;font-size:15.5px;color:var(--gold-bright);margin:0 0 2px;}
+.book-author{font-size:12px;color:var(--muted);margin-bottom:6px;}
+.book-desc{font-size:12.5px;color:var(--ink);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.book-formats{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* kanał YT */
+.playlist-card{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;margin-bottom:12px;}
+.playlist-head{display:flex;gap:14px;}
+.pl-thumb{width:150px;min-width:150px;aspect-ratio:16/9;border-radius:5px;object-fit:cover;background:var(--surface2);border:1px solid var(--line-bright);}
+.pl-thumb-placeholder{width:150px;min-width:150px;aspect-ratio:16/9;border-radius:5px;background:linear-gradient(160deg,var(--surface2),var(--bg));border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;color:var(--gold-dim);font-size:11px;text-align:center;padding:6px;}
+.playlist-embed{margin-top:12px;border-radius:6px;overflow:hidden;border:1px solid var(--line-bright);}
+.playlist-embed iframe{width:100%;aspect-ratio:16/9;display:block;border:0;}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div id="nav">
+    <div class="nav-logo-row">
+      <img id="navSeal" class="nav-seal" alt="Pieczęć AWA">
+      <div class="nav-logo">Archiwum Wielkiej<br>Apostazji</div>
+    </div>
+    <div class="nav-sub">AWA</div>
+    <div class="nav-item active" data-mod="start">Start</div>
+    <div class="nav-item" data-mod="browse">Przeglądarka</div>
+    <div class="nav-item" data-mod="index">Indeks A–Z</div>
+    <div class="nav-item" data-mod="search">Szukaj</div>
+    <div class="nav-item" data-mod="graph">Mapa pojęć</div>
+    <div class="nav-item" data-mod="sources">Wykaz źródeł</div>
+    <div class="nav-item" data-mod="books">Książki</div>
+    <div class="nav-item" data-mod="channel">Kanał YT</div>
+  </div>
+  <div id="content">
+    <div id="topbar">
+      <h2>Archiwum</h2>
+      <div class="spacer"></div>
+    </div>
+
+    <!-- START -->
+    <div class="module active" id="mod-start">
+      <div class="hero">
+        <img id="heroImg" alt="Pieczęć Archiwum Wielkiej Apostazji na marmurze">
+      </div>
+      <p class="pagesub" style="margin-top:14px;">Zaplecze referencyjne dla książek AWA — pojęcia, argumenty i źródła skatalogowane i możliwe do samodzielnej weryfikacji.</p>
+      <div class="card" style="margin-bottom:18px;">
+        <div id="startStats" class="hint"></div>
+      </div>
+      <div class="zespol-title">Ostatnio dodane</div>
+      <div id="recentList"></div>
+    </div>
+
+    <!-- PRZEGLĄDARKA -->
+    <div class="module" id="mod-browse">
+      <h1 class="pagetitle">Przeglądarka</h1>
+      <p class="pagesub">Jednostki archiwalne pogrupowane według zespołów.</p>
+      <div id="browseList"></div>
+    </div>
+
+    <!-- INDEKS A-Z -->
+    <div class="module" id="mod-index">
+      <h1 class="pagetitle">Indeks alfabetyczny</h1>
+      <p class="pagesub">Hasła zebrane ze słów kluczowych wszystkich artykułów.</p>
+      <div id="indexList"></div>
+    </div>
+
+    <!-- SZUKAJ -->
+    <div class="module" id="mod-search">
+      <h1 class="pagetitle">Szukaj w archiwum</h1>
+      <input id="searchInput" placeholder="Wpisz frazę…" style="width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:6px;font-size:14px;margin-bottom:16px;">
+      <div id="searchResults"></div>
+    </div>
+
+    <!-- MAPA POJĘĆ -->
+    <div class="module" id="mod-graph">
+      <h1 class="pagetitle">Mapa pojęć</h1>
+      <p class="pagesub">Natywna, minimalistyczna wizualizacja połączeń między hasłami a artykułami. Kliknij węzeł, aby przejść dalej.</p>
+      <svg id="graphSvg" viewBox="0 0 600 520"></svg>
+    </div>
+
+    <!-- WYKAZ ŹRÓDEŁ -->
+    <div class="module" id="mod-sources">
+      <h1 class="pagetitle">Wykaz źródeł</h1>
+      <p class="pagesub">Pozycje bibliograficzne wykorzystane w artykułach, z odsyłaczami do miejsc cytowania.</p>
+      <div id="sourcesList"></div>
+    </div>
+
+    <!-- KSIĄŻKI -->
+    <div class="module" id="mod-books">
+      <h1 class="pagetitle">Książki</h1>
+      <p class="pagesub">Darmowe e-booki — wyniki pracy badawczej AWA, do pobrania w kilku formatach.</p>
+      <div id="booksList"></div>
+    </div>
+
+    <!-- KANAŁ YT -->
+    <div class="module" id="mod-channel">
+      <h1 class="pagetitle">Kanał YT</h1>
+      <p class="pagesub">Prezentacje wideo — playlisty z kanału AWA na YouTube.</p>
+      <div class="card" style="margin-bottom:20px;" id="channelLinkCard">
+        <div id="channelLinkOut"></div>
+      </div>
+      <div id="playlistsList"></div>
+    </div>
+
+    <!-- ARTYKUŁ -->
+    <div class="module" id="mod-article">
+      <div class="breadcrumb" id="articleBreadcrumb"></div>
+      <div class="art-seal-row"><img id="articleSeal" class="art-seal" alt="Pieczęć AWA"><div class="sygnatura" id="articleSygnatura"></div></div>
+      <h1 class="pagetitle" id="articleTitle"></h1>
+      <p class="pagesub" id="articleMetaLine"></p>
+      <div id="articleKeywords" style="margin-bottom:16px;"></div>
+      <div id="articlePdfLink" style="margin-bottom:16px;"></div>
+      <div class="art-body" id="articleBody"></div>
+      <div class="art-footnotes" id="articleFootnotes"></div>
+      <div class="art-biblio" id="articleBiblio"></div>
+      <div class="cite-box" id="articleCite"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+
+const SEAL_IMG = 'assets/seal.jpg';
+const HERO_IMG = 'assets/hero.jpg';
+document.querySelectorAll('#navSeal').forEach(el=> el.src = SEAL_IMG);
+const heroImgEl = document.getElementById('heroImg'); if(heroImgEl) heroImgEl.src = HERO_IMG;
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ============================= DANE — wyłącznie odczyt, wyłącznie z data/*.json =============================
+   Strona publiczna niczego nie zapisuje. Te pliki JSON są publikowane przez panel administracyjny (osobne
+   narzędzie, uruchamiane wyłącznie lokalnie) — publiczna strona tylko je czyta. Jeśli otwierasz ten plik
+   bezpośrednio z dysku (dwuklik), fetch() może nie zadziałać z powodu ograniczeń CORS dla protokołu file://
+   — do lokalnego testowania uruchom prosty serwer (np. `python -m http.server`) w tym folderze; na docelowym
+   hostingu (http/https) to ograniczenie nie występuje. */
+let ARTICLES = [];
+let BOOKS = [];
+let PLAYLISTS = [];
+let CHANNEL_URL = '';
+
+async function fetchJson(path, fallback){
+  try{
+    const r = await fetch(path, {cache:'no-store'});
+    if(!r.ok) return fallback;
+    return await r.json();
+  }catch(e){ return fallback; }
+}
+
+async function loadAllData(){
+  const [articlesData, booksData, playlistsData, channelData] = await Promise.all([
+    fetchJson('data/articles.json', {articles:[]}),
+    fetchJson('data/books.json', {books:[]}),
+    fetchJson('data/playlists.json', {playlists:[]}),
+    fetchJson('data/channel.json', {url:''})
+  ]);
+  ARTICLES = (articlesData.articles||[]).slice().sort((a,b)=> new Date(b.importedAt)-new Date(a.importedAt));
+  BOOKS = (booksData.books||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
+  PLAYLISTS = (playlistsData.playlists||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
+  CHANNEL_URL = channelData.url || '';
+}
+
+/* ============================= NAWIGACJA ============================= */
+document.querySelectorAll('.nav-item').forEach(n=> n.onclick = ()=> switchModule(n.dataset.mod));
+function switchModule(name){
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x.dataset.mod===name));
+  document.querySelectorAll('.module').forEach(m=>m.classList.toggle('active', m.id==='mod-'+name));
+  if(name==='start') renderStart();
+  if(name==='browse') renderBrowse();
+  if(name==='index') renderIndex();
+  if(name==='graph') renderGraph();
+  if(name==='sources') renderSources();
+  if(name==='books') renderBooks();
+  if(name==='channel'){ renderChannelLink(); renderPlaylists(); }
+}
+
+/* ============================= START ============================= */
+function renderStart(){
+  const kwSet = new Set(); ARTICLES.forEach(a=>(a.keywords||[]).forEach(k=>kwSet.add(k)));
+  $('#startStats').textContent = `Jednostek archiwalnych: ${ARTICLES.length} · Haseł w indeksie: ${kwSet.size}`;
+  const list = $('#recentList'); list.innerHTML='';
+  ARTICLES.slice(0,8).forEach(a=> list.appendChild(articleRow(a)));
+  if(ARTICLES.length===0) list.innerHTML = '<div class="hint">Archiwum jest jeszcze puste — wróć wkrótce.</div>';
+}
+function articleRow(a){
+  const d = document.createElement('div'); d.className='article-row';
+  d.innerHTML = `<div class="article-title">${escapeHtml(a.title)}</div>
+    <div class="article-meta"><span class="sygnatura">${escapeHtml(a.signature||'')}</span>${a.category?' · '+escapeHtml(a.category):''}</div>`;
+  d.onclick = ()=> openArticle(a.id);
+  return d;
+}
+
+/* ============================= PRZEGLĄDARKA ============================= */
+function renderBrowse(){
+  const wrap = $('#browseList'); wrap.innerHTML='';
+  if(ARTICLES.length===0){ wrap.innerHTML='<div class="hint">Brak artykułów.</div>'; return; }
+  const groups = {};
+  ARTICLES.forEach(a=>{ const cat = a.category || 'Bez kategorii'; (groups[cat]=groups[cat]||[]).push(a); });
+  Object.keys(groups).sort().forEach(cat=>{
+    const g = document.createElement('div'); g.className='zespol-group';
+    g.innerHTML = `<div class="zespol-title">${escapeHtml(cat)}</div>`;
+    groups[cat].forEach(a=> g.appendChild(articleRow(a)));
+    wrap.appendChild(g);
+  });
+}
+
+/* ============================= INDEKS A-Z ============================= */
+function renderIndex(){
+  const wrap = $('#indexList'); wrap.innerHTML='';
+  const map = {};
+  ARTICLES.forEach(a=> (a.keywords||[]).forEach(k=>{ (map[k]=map[k]||[]).push(a); }));
+  const terms = Object.keys(map).sort((a,b)=>a.localeCompare(b,'pl'));
+  if(terms.length===0){ wrap.innerHTML='<div class="hint">Brak haseł.</div>'; return; }
+  let lastLetter = '';
+  terms.forEach(term=>{
+    const letter = term[0].toUpperCase();
+    if(letter!==lastLetter){ const h=document.createElement('div'); h.className='az-letter'; h.textContent=letter; wrap.appendChild(h); lastLetter=letter; }
+    const d = document.createElement('div'); d.className='az-term';
+    d.innerHTML = `${escapeHtml(term)} <span class="az-count">(${map[term].length})</span>`;
+    d.onclick = ()=> showTermArticles(term, map[term]);
+    wrap.appendChild(d);
+  });
+}
+function showTermArticles(term, articles){
+  const wrap = $('#indexList');
+  const box = document.createElement('div'); box.className='card'; box.style.margin='10px 0';
+  box.innerHTML = `<strong>${escapeHtml(term)}</strong>`;
+  articles.forEach(a=> box.appendChild(articleRow(a)));
+  const existing = wrap.querySelector('.term-detail'); if(existing) existing.remove();
+  box.classList.add('term-detail');
+  wrap.insertBefore(box, wrap.firstChild);
+}
+
+/* ============================= SZUKAJ ============================= */
+$('#searchInput').addEventListener('input', doSearch);
+function doSearch(){
+  const q = $('#searchInput').value.trim().toLowerCase();
+  const res = $('#searchResults'); res.innerHTML='';
+  if(!q){ return; }
+  const hits = ARTICLES.filter(a=>{
+    const hay = (a.title+' '+(a.keywords||[]).join(' ')+' '+(a.bodyText||'')).toLowerCase();
+    return hay.includes(q);
+  });
+  if(hits.length===0){ res.innerHTML='<div class="hint">Brak wyników.</div>'; return; }
+  hits.forEach(a=> res.appendChild(articleRow(a)));
+}
+
+/* ============================= MAPA POJĘĆ (natywna, minimalistyczna) ============================= */
+function renderGraph(){
+  const svg = $('#graphSvg');
+  const kwSet = new Set(); ARTICLES.forEach(a=>(a.keywords||[]).forEach(k=>kwSet.add(k)));
+  const keywords = Array.from(kwSet);
+  if(keywords.length===0){ svg.innerHTML = '<text x="300" y="260" text-anchor="middle" fill="#a89878" font-size="13">Brak danych do wizualizacji.</text>'; return; }
+  const CX=300, CY=260, R=200;
+  const kwPos = {};
+  keywords.forEach((k,i)=>{ const ang=(i/keywords.length)*Math.PI*2; kwPos[k]={x:CX+R*Math.cos(ang), y:CY+R*Math.sin(ang)}; });
+  let svgContent = '';
+  ARTICLES.forEach(a=>{
+    const pts = (a.keywords||[]).map(k=>kwPos[k]).filter(Boolean);
+    if(pts.length===0) return;
+    const ax = CX+(pts.reduce((s,p)=>s+p.x,0)/pts.length-CX)*0.55;
+    const ay = CY+(pts.reduce((s,p)=>s+p.y,0)/pts.length-CY)*0.55;
+    pts.forEach(p=>{ svgContent += `<line x1="${ax}" y1="${ay}" x2="${p.x}" y2="${p.y}" stroke="#3d3524" stroke-width="1"/>`; });
+    svgContent += `<circle cx="${ax}" cy="${ay}" r="5" fill="#a3453a" data-article="${a.id}" style="cursor:pointer;"/>`;
+    svgContent += `<text class="graph-art-label" x="${ax+8}" y="${ay+3}" data-article="${a.id}">${escapeHtml(a.title.slice(0,22))}</text>`;
+  });
+  keywords.forEach(k=>{
+    const p = kwPos[k];
+    svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#c9a961" data-term="${escapeHtml(k)}" style="cursor:pointer;"/>`;
+    svgContent += `<text class="graph-kw-label" x="${p.x+7}" y="${p.y+3}" data-term="${escapeHtml(k)}">${escapeHtml(k)}</text>`;
+  });
+  svg.innerHTML = svgContent;
+  svg.onclick = (e)=>{
+    const artId = e.target.getAttribute('data-article');
+    const term = e.target.getAttribute('data-term');
+    if(artId) openArticle(artId);
+    else if(term){ switchModule('index'); const map={}; ARTICLES.forEach(a=>(a.keywords||[]).forEach(k=>{(map[k]=map[k]||[]).push(a);})); showTermArticles(term, map[term]||[]); }
+  };
+}
+
+/* ============================= WYKAZ ŹRÓDEŁ ============================= */
+function renderSources(){
+  const wrap = $('#sourcesList'); wrap.innerHTML='';
+  const map = {}; // biblioText -> [articles]
+  ARTICLES.forEach(a=> (a.biblioItems||[]).forEach(b=>{ (map[b]=map[b]||[]).push(a); }));
+  const keys = Object.keys(map).sort((a,b)=>a.localeCompare(b,'pl'));
+  if(keys.length===0){ wrap.innerHTML='<div class="hint">Brak danych bibliograficznych.</div>'; return; }
+  keys.forEach(src=>{
+    const d = document.createElement('div'); d.className='card'; d.style.marginBottom='10px';
+    d.innerHTML = `<div style="font-size:13px;">${escapeHtml(src)}</div><div class="hint" style="margin-top:6px;">Cytowane w: </div>`;
+    const hintEl = d.querySelector('.hint');
+    map[src].forEach(a=>{
+      const link = document.createElement('span');
+      link.textContent = a.title; link.style.cssText='cursor:pointer;color:var(--gold-bright);margin-right:8px;';
+      link.onclick = ()=> openArticle(a.id);
+      hintEl.appendChild(link);
+    });
+    wrap.appendChild(d);
+  });
+}
+
+/* ============================= WIDOK ARTYKUŁU ============================= */
+function openArticle(id){
+  const a = ARTICLES.find(x=>x.id===id);
+  if(!a) return;
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.module').forEach(m=>m.classList.toggle('active', m.id==='mod-article'));
+  $('#articleBreadcrumb').innerHTML = `<span data-nav="browse">Przeglądarka</span> / ${escapeHtml(a.category||'Bez kategorii')} / ${escapeHtml(a.signature||'')}`;
+  $('#articleBreadcrumb').querySelector('[data-nav]').onclick = ()=> switchModule('browse');
+  $('#articleSygnatura').textContent = a.signature||'';
+  $('#articleSeal').src = SEAL_IMG;
+  $('#articleTitle').textContent = a.title;
+  $('#articleMetaLine').textContent = [a.author, a.category].filter(Boolean).join(' · ');
+  $('#articleKeywords').innerHTML = (a.keywords||[]).map(k=>`<span class="keyword-tag">${escapeHtml(k)}</span>`).join('');
+  $('#articleKeywords').querySelectorAll('.keyword-tag').forEach(el=>{
+    el.onclick = ()=>{ const term=el.textContent; switchModule('index'); const map={}; ARTICLES.forEach(x=>(x.keywords||[]).forEach(k=>{(map[k]=map[k]||[]).push(x);})); showTermArticles(term, map[term]||[]); };
+  });
+  $('#articlePdfLink').innerHTML = a.pdfBase64 ? `<a class="btn" href="${a.pdfBase64}" download="${escapeHtml(a.signature||a.title)}.pdf">Pobierz PDF</a>` : '';
+  $('#articleBody').innerHTML = a.bodyHtml || '';
+  $('#articleFootnotes').innerHTML = a.footnotesHtml ? `<h3>Przypisy</h3>${a.footnotesHtml}` : '';
+  $('#articleBiblio').innerHTML = a.biblioHtml ? `<h3>Bibliografia</h3>${a.biblioHtml}` : '';
+  $('#articleCite').textContent = 'Jak cytować: ' + citeArticle(a);
+}
+function citeArticle(a){
+  const pieces = [];
+  if(a.author) pieces.push(a.author);
+  pieces.push(`„${a.title}"`);
+  pieces.push('w: Archiwum Wielkiej Apostazji');
+  if(a.signature) pieces.push(a.signature);
+  pieces.push('dostęp: ' + new Date().toLocaleDateString('pl-PL'));
+  return pieces.join(', ') + '.';
+}
+
+/* ============================= KSIĄŻKI — wyłącznie pobieranie ============================= */
+function renderBooks(){
+  const wrap = $('#booksList'); wrap.innerHTML='';
+  if(BOOKS.length===0){ wrap.innerHTML = '<div class="hint">Brak książek — wróć wkrótce.</div>'; return; }
+  BOOKS.forEach(b=>{
+    const card = document.createElement('div'); card.className = 'book-card';
+    const coverHtml = b.coverBase64
+      ? `<img class="book-cover" src="${b.coverBase64}" alt="Okładka: ${escapeHtml(b.title)}">`
+      : `<div class="book-cover-placeholder">${escapeHtml(b.title.slice(0,28))}</div>`;
+    const formatsHtml = (b.formats||[]).map((f,i)=>
+      `<button class="btn" data-book="${b.id}" data-fmt="${i}">${escapeHtml(f.format)}</button>`
+    ).join('');
+    card.innerHTML = `
+      ${coverHtml}
+      <div style="flex:1;min-width:0;">
+        <div class="book-title">${escapeHtml(b.title)}</div>
+        ${b.author ? `<div class="book-author">${escapeHtml(b.author)}</div>` : ''}
+        ${b.description ? `<div class="book-desc">${escapeHtml(b.description)}</div>` : ''}
+        <div class="book-formats">${formatsHtml}</div>
+      </div>`;
+    card.querySelectorAll('[data-fmt]').forEach(btn=>{
+      btn.onclick = ()=>{
+        const book = BOOKS.find(x=>x.id===btn.dataset.book);
+        const fmt = book.formats[parseInt(btn.dataset.fmt,10)];
+        if(fmt.kind==='link'){ window.open(fmt.data, '_blank'); }
+        else{
+          const a = document.createElement('a');
+          a.href = fmt.data; a.download = fmt.filename || (book.title.toLowerCase().replace(/[^a-z0-9]+/g,'-')+'.'+fmt.format.toLowerCase());
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+      };
+    });
+    wrap.appendChild(card);
+  });
+}
+
+/* ============================= KANAŁ YT ============================= */
+function renderChannelLink(){
+  $('#channelLinkOut').innerHTML = CHANNEL_URL
+    ? `<a class="btn" href="${escapeHtml(CHANNEL_URL)}" target="_blank" rel="noopener">Odwiedź kanał na YouTube</a>`
+    : '<span class="hint">Kanał nie jest jeszcze podlinkowany.</span>';
+}
+function extractPlaylistId(url){
+  const m = (url||'').match(/[?&]list=([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+function renderPlaylists(){
+  const wrap = $('#playlistsList'); wrap.innerHTML='';
+  if(PLAYLISTS.length===0){ wrap.innerHTML = '<div class="hint">Brak playlist — wróć wkrótce.</div>'; return; }
+  PLAYLISTS.forEach(pl=>{
+    const card = document.createElement('div'); card.className = 'playlist-card';
+    const thumbHtml = pl.thumbBase64
+      ? `<img class="pl-thumb" src="${pl.thumbBase64}" alt="Miniatura: ${escapeHtml(pl.title)}">`
+      : `<div class="pl-thumb-placeholder">${escapeHtml(pl.title.slice(0,28))}</div>`;
+    card.innerHTML = `
+      <div class="playlist-head">
+        ${thumbHtml}
+        <div style="flex:1;min-width:0;">
+          <div class="book-title">${escapeHtml(pl.title)}</div>
+          ${pl.description ? `<div class="book-desc">${escapeHtml(pl.description)}</div>` : ''}
+          <div class="book-formats" style="margin-top:6px;">
+            <button class="btn" data-play="${pl.id}">Odtwórz tutaj</button>
+            <a class="btn" href="${escapeHtml(pl.url)}" target="_blank" rel="noopener">Otwórz na YouTube</a>
+          </div>
+        </div>
+      </div>
+      <div class="playlist-embed" id="embed-${pl.id}" style="display:none;"></div>
+    `;
+    card.querySelector('[data-play]').onclick = ()=>{
+      const embedDiv = card.querySelector('.playlist-embed');
+      const isOpen = embedDiv.style.display !== 'none';
+      if(isOpen){ embedDiv.style.display='none'; embedDiv.innerHTML=''; return; }
+      const id = extractPlaylistId(pl.url);
+      embedDiv.innerHTML = `<iframe src="https://www.youtube.com/embed/videoseries?list=${id}" title="${escapeHtml(pl.title)}" allowfullscreen loading="lazy"></iframe>`;
+      embedDiv.style.display = 'block';
+    };
+    wrap.appendChild(card);
+  });
+}
+
+/* init */
+loadAllData().then(renderStart);
+</script>
+</body>
+</html>
