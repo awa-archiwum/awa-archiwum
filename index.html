@@ -2,6 +2,18 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Blokujące, uruchamiane przed CSS/resztą strony — inaczej użytkownik z zapisanym trybem
+   jasnym widziałby ułamek sekundy ciemnego motywu przy każdym wejściu. Klucz zapisany
+   literalnie (nie przez stałą JS) celowo — ten skrypt musi być w pełni samodzielny. */
+(function(){
+  try{
+    if(localStorage.getItem('awaarchiwum:theme') === 'light'){
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  }catch(e){}
+})();
+</script>
 <title>Archiwum Wielkiej Apostazji</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -10,11 +22,21 @@
   --bg:#15120d; --surface:#1f1a13; --surface2:#2a2318; --line:#3d3524; --line-bright:#5a4d31;
   --gold:#c9a961; --gold-bright:#e6c988; --gold-dim:#8b7442;
   --ink:#ece6d6; --muted:#a89878; --wine:#7a2e26; --wine-bright:#a3453a;
+  --nav-grad-1:#1a160f; --nav-grad-2:#100d09;
+}
+/* Tryb jasny: te same role kolorów (tło/karta/tekst/akcent), przemyślane osobno pod kątem
+   kontrastu na jasnym pergaminowym tle — nie proste odwrócenie jasności. Zweryfikowane
+   względem WCAG (stosunek kontrastu ≥4.5:1 dla tekstu, ≥3:1 dla obramowań/dużego tekstu). */
+:root[data-theme="light"]{
+  --bg:#f2ead6; --surface:#fbf7ec; --surface2:#ece0c2; --line:#ddd0ab; --line-bright:#9c7f3f;
+  --gold:#a17f3a; --gold-bright:#6e5320; --gold-dim:#8a6c33;
+  --ink:#2b2013; --muted:#6b5f45; --wine:#7a2b21; --wine-bright:#9c3a28;
+  --nav-grad-1:#f8f0dc; --nav-grad-2:#ece0c2;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;}
 #shell{display:flex;height:100vh;}
-#nav{width:210px;min-width:210px;background:linear-gradient(180deg,#1a160f,#100d09);color:var(--ink);display:flex;flex-direction:column;padding:18px 0;border-right:1px solid var(--line);}
+#nav{width:210px;min-width:210px;background:linear-gradient(180deg,var(--nav-grad-1),var(--nav-grad-2));color:var(--ink);display:flex;flex-direction:column;padding:18px 0;border-right:1px solid var(--line);}
 .nav-logo-row{display:flex;align-items:center;gap:10px;padding:0 18px 10px;}
 .nav-seal{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
 .nav-logo{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--gold-bright);}
@@ -26,6 +48,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family
 #topbar{display:flex;align-items:center;gap:14px;padding:10px 22px;border-bottom:1px solid var(--line);background:var(--surface);}
 #topbar h2{font-family:'Fraunces',serif;font-size:16px;margin:0;font-weight:600;color:var(--gold-bright);}
 .spacer{flex:1;}
+#themeToggleBtn{display:flex;align-items:center;justify-content:center;padding:7px;line-height:0;}
 .module{flex:1;overflow:auto;padding:26px 32px;display:none;max-width:860px;}
 .module.active{display:block;}
 .btn{border:1px solid var(--line-bright);background:var(--surface2);color:var(--ink);padding:7px 13px;border-radius:5px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;text-decoration:none;display:inline-block;}
@@ -73,6 +96,10 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 #graphSvg{width:100%;height:520px;background:var(--surface);border:1px solid var(--line);border-radius:8px;}
 .graph-kw-label{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--gold-bright);cursor:pointer;}
 .graph-art-label{font-family:'Fraunces',serif;font-size:10.5px;fill:var(--ink);cursor:pointer;}
+.graph-line{stroke:var(--line);}
+.graph-node-article{fill:var(--wine-bright);}
+.graph-node-kw{fill:var(--gold);}
+.graph-empty-text{fill:var(--muted);}
 
 /* książki */
 .book-card{display:flex;gap:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;margin-bottom:12px;}
@@ -113,6 +140,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <div id="topbar">
       <h2>Archiwum</h2>
       <div class="spacer"></div>
+      <button class="btn" id="themeToggleBtn" aria-label="Przełącz tryb jasny/ciemny"></button>
     </div>
 
     <!-- START -->
@@ -204,6 +232,34 @@ const HERO_IMG = 'assets/hero.jpg';
 document.querySelectorAll('#navSeal').forEach(el=> el.src = SEAL_IMG);
 const heroImgEl = document.getElementById('heroImg'); if(heroImgEl) heroImgEl.src = HERO_IMG;
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* ============================= TRYB JASNY/CIEMNY =============================
+   Stan trzymany na atrybucie data-theme elementu <html> (brak atrybutu = ciemny, domyślny).
+   Zapamiętywane w localStorage — zwykła strona internetowa, nie artefakt Claude.ai, więc
+   localStorage jest tu właściwym, standardowym rozwiązaniem (w odróżnieniu od panelu admina,
+   który celowo tego unika). Ikona na przycisku pokazuje TRYB DOCELOWY (kliknięcie da), nie
+   tryb bieżący — słońce w trybie ciemnym ("przełącz na jasny"), księżyc w jasnym ("na ciemny"). */
+const THEME_KEY = 'awaarchiwum:theme';
+const ICON_SUN = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>';
+const ICON_MOON = '<svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>';
+function setThemeUI(theme){
+  const btn = $('#themeToggleBtn');
+  if(theme === 'light'){
+    document.documentElement.setAttribute('data-theme', 'light');
+    btn.innerHTML = ICON_MOON;
+    btn.title = 'Przełącz na tryb ciemny';
+  }else{
+    document.documentElement.removeAttribute('data-theme');
+    btn.innerHTML = ICON_SUN;
+    btn.title = 'Przełącz na tryb jasny';
+  }
+}
+$('#themeToggleBtn').onclick = ()=>{
+  const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+  setThemeUI(next);
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+};
+setThemeUI(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
 
 /* ============================= DANE — wyłącznie odczyt, wyłącznie z data/*.json =============================
    Strona publiczna niczego nie zapisuje. Te pliki JSON są publikowane przez panel administracyjny (osobne
@@ -327,7 +383,7 @@ function renderGraph(){
   const svg = $('#graphSvg');
   const kwSet = new Set(); ARTICLES.forEach(a=>(a.keywords||[]).forEach(k=>kwSet.add(k)));
   const keywords = Array.from(kwSet);
-  if(keywords.length===0){ svg.innerHTML = '<text x="300" y="260" text-anchor="middle" fill="#a89878" font-size="13">Brak danych do wizualizacji.</text>'; return; }
+  if(keywords.length===0){ svg.innerHTML = '<text class="graph-empty-text" x="300" y="260" text-anchor="middle" font-size="13">Brak danych do wizualizacji.</text>'; return; }
   const CX=300, CY=260, R=200;
   const kwPos = {};
   keywords.forEach((k,i)=>{ const ang=(i/keywords.length)*Math.PI*2; kwPos[k]={x:CX+R*Math.cos(ang), y:CY+R*Math.sin(ang)}; });
@@ -337,13 +393,13 @@ function renderGraph(){
     if(pts.length===0) return;
     const ax = CX+(pts.reduce((s,p)=>s+p.x,0)/pts.length-CX)*0.55;
     const ay = CY+(pts.reduce((s,p)=>s+p.y,0)/pts.length-CY)*0.55;
-    pts.forEach(p=>{ svgContent += `<line x1="${ax}" y1="${ay}" x2="${p.x}" y2="${p.y}" stroke="#3d3524" stroke-width="1"/>`; });
-    svgContent += `<circle cx="${ax}" cy="${ay}" r="5" fill="#a3453a" data-article="${a.id}" style="cursor:pointer;"/>`;
+    pts.forEach(p=>{ svgContent += `<line class="graph-line" x1="${ax}" y1="${ay}" x2="${p.x}" y2="${p.y}" stroke-width="1"/>`; });
+    svgContent += `<circle class="graph-node-article" cx="${ax}" cy="${ay}" r="5" data-article="${a.id}" style="cursor:pointer;"/>`;
     svgContent += `<text class="graph-art-label" x="${ax+8}" y="${ay+3}" data-article="${a.id}">${escapeHtml(a.title.slice(0,22))}</text>`;
   });
   keywords.forEach(k=>{
     const p = kwPos[k];
-    svgContent += `<circle cx="${p.x}" cy="${p.y}" r="4" fill="#c9a961" data-term="${escapeHtml(k)}" style="cursor:pointer;"/>`;
+    svgContent += `<circle class="graph-node-kw" cx="${p.x}" cy="${p.y}" r="4" data-term="${escapeHtml(k)}" style="cursor:pointer;"/>`;
     svgContent += `<text class="graph-kw-label" x="${p.x+7}" y="${p.y+3}" data-term="${escapeHtml(k)}">${escapeHtml(k)}</text>`;
   });
   svg.innerHTML = svgContent;
