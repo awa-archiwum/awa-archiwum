@@ -92,14 +92,20 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 .art-footnotes h3,.art-biblio h3{font-family:'Fraunces',serif;font-size:15px;color:var(--gold-bright);}
 .cite-box{background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:20px;color:var(--muted);}
 
-/* mapa pojęć */
-#graphSvg{width:100%;height:520px;background:var(--surface);border:1px solid var(--line);border-radius:8px;}
-.graph-kw-label{font-family:'JetBrains Mono',monospace;font-size:10px;fill:var(--gold-bright);cursor:pointer;}
-.graph-art-label{font-family:'Fraunces',serif;font-size:10.5px;fill:var(--ink);cursor:pointer;}
-.graph-line{stroke:var(--line);}
-.graph-node-article{fill:var(--wine-bright);}
-.graph-node-kw{fill:var(--gold);}
-.graph-empty-text{fill:var(--muted);}
+/* mapa pojęć (nawigacja krok-po-kroku, jak The Brain) */
+.graph-index-tabs{display:flex;gap:8px;margin-bottom:12px;}
+.graph-tab.active{border-color:var(--gold);background:var(--gold);color:#20180c;}
+.graph-index{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 14px;margin-bottom:18px;}
+.graph-focus{border:1px solid var(--line-bright);border-radius:8px;background:var(--surface);padding:16px 18px;}
+.graph-focus-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.graph-focus-name{font-family:'Fraunces',serif;font-size:19px;color:var(--gold-bright);margin:0;}
+.graph-rel-group{margin-bottom:14px;}
+.graph-rel-heading{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;}
+.graph-node-link{display:inline-block;font-family:'Fraunces',serif;font-size:14px;color:var(--ink);cursor:pointer;padding:3px 0;margin-right:4px;}
+.graph-node-link:hover{color:var(--gold-bright);}
+.graph-relation-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0;}
+.graph-relation-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wine-bright);cursor:pointer;border-bottom:1px dotted var(--wine-bright);}
+.graph-relation-label:hover{color:var(--gold-bright);border-color:var(--gold-bright);}
 
 /* książki */
 .book-card{display:flex;gap:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;margin-bottom:12px;}
@@ -129,7 +135,6 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <div class="nav-sub">AWA</div>
     <div class="nav-item active" data-mod="start">Start</div>
     <div class="nav-item" data-mod="browse">Przeglądarka</div>
-    <div class="nav-item" data-mod="index">Indeks A–Z</div>
     <div class="nav-item" data-mod="search">Szukaj</div>
     <div class="nav-item" data-mod="graph">Mapa pojęć</div>
     <div class="nav-item" data-mod="sources">Wykaz źródeł</div>
@@ -163,13 +168,6 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
       <div id="browseList"></div>
     </div>
 
-    <!-- INDEKS A-Z -->
-    <div class="module" id="mod-index">
-      <h1 class="pagetitle">Indeks alfabetyczny</h1>
-      <p class="pagesub">Hasła zebrane ze słów kluczowych wszystkich artykułów.</p>
-      <div id="indexList"></div>
-    </div>
-
     <!-- SZUKAJ -->
     <div class="module" id="mod-search">
       <h1 class="pagetitle">Szukaj w archiwum</h1>
@@ -180,8 +178,14 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <!-- MAPA POJĘĆ -->
     <div class="module" id="mod-graph">
       <h1 class="pagetitle">Mapa pojęć</h1>
-      <p class="pagesub">Natywna, minimalistyczna wizualizacja połączeń między hasłami a artykułami. Kliknij węzeł, aby przejść dalej.</p>
-      <svg id="graphSvg" viewBox="0 0 600 520"></svg>
+      <p class="pagesub">Pojęcia i osoby jako sieć powiązań. Wybierz punkt startowy z indeksu, potem przechodź krok po kroku — do rodzica, dziecka albo dowolnego powiązania.</p>
+      <div class="graph-index-tabs">
+        <button class="btn graph-tab active" type="button" data-tab="concepts">Pojęcia</button>
+        <button class="btn graph-tab" type="button" data-tab="persons">Osoby</button>
+      </div>
+      <div id="graphIndexConcepts" class="graph-index"></div>
+      <div id="graphIndexPersons" class="graph-index" style="display:none;"></div>
+      <div id="graphFocus" class="graph-focus"></div>
     </div>
 
     <!-- WYKAZ ŹRÓDEŁ -->
@@ -271,6 +275,9 @@ let ARTICLES = [];
 let BOOKS = [];
 let PLAYLISTS = [];
 let CHANNEL_URL = '';
+let CONCEPTS = [];
+let PERSONS = [];
+let RELATIONS = [];
 
 async function fetchJson(path, fallback){
   try{
@@ -281,16 +288,22 @@ async function fetchJson(path, fallback){
 }
 
 async function loadAllData(){
-  const [articlesData, booksData, playlistsData, channelData] = await Promise.all([
+  const [articlesData, booksData, playlistsData, channelData, conceptsData, personsData, relationsData] = await Promise.all([
     fetchJson('data/articles.json', {articles:[]}),
     fetchJson('data/books.json', {books:[]}),
     fetchJson('data/playlists.json', {playlists:[]}),
-    fetchJson('data/channel.json', {url:''})
+    fetchJson('data/channel.json', {url:''}),
+    fetchJson('data/concepts.json', {concepts:[]}),
+    fetchJson('data/persons.json', {persons:[]}),
+    fetchJson('data/relations.json', {relations:[]})
   ]);
   ARTICLES = (articlesData.articles||[]).slice().sort((a,b)=> new Date(b.importedAt)-new Date(a.importedAt));
   BOOKS = (booksData.books||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
   PLAYLISTS = (playlistsData.playlists||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
   CHANNEL_URL = channelData.url || '';
+  CONCEPTS = conceptsData.concepts||[];
+  PERSONS = personsData.persons||[];
+  RELATIONS = relationsData.relations||[];
 }
 
 /* ============================= NAWIGACJA ============================= */
@@ -300,8 +313,7 @@ function switchModule(name){
   document.querySelectorAll('.module').forEach(m=>m.classList.toggle('active', m.id==='mod-'+name));
   if(name==='start') renderStart();
   if(name==='browse') renderBrowse();
-  if(name==='index') renderIndex();
-  if(name==='graph') renderGraph();
+  if(name==='graph') renderGraphModule();
   if(name==='sources') renderSources();
   if(name==='books') renderBooks();
   if(name==='channel'){ renderChannelLink(); renderPlaylists(); }
@@ -309,8 +321,7 @@ function switchModule(name){
 
 /* ============================= START ============================= */
 function renderStart(){
-  const kwSet = new Set(); ARTICLES.forEach(a=>(a.keywords||[]).forEach(k=>kwSet.add(k)));
-  $('#startStats').textContent = `Jednostek archiwalnych: ${ARTICLES.length} · Haseł w indeksie: ${kwSet.size}`;
+  $('#startStats').textContent = `Jednostek archiwalnych: ${ARTICLES.length} · Pojęć: ${CONCEPTS.length} · Osób: ${PERSONS.length} · Powiązań: ${RELATIONS.length}`;
   const list = $('#recentList'); list.innerHTML='';
   ARTICLES.slice(0,8).forEach(a=> list.appendChild(articleRow(a)));
   if(ARTICLES.length===0) list.innerHTML = '<div class="hint">Archiwum jest jeszcze puste — wróć wkrótce.</div>';
@@ -337,78 +348,150 @@ function renderBrowse(){
   });
 }
 
-/* ============================= INDEKS A-Z ============================= */
-function renderIndex(){
-  const wrap = $('#indexList'); wrap.innerHTML='';
-  const map = {};
-  ARTICLES.forEach(a=> (a.keywords||[]).forEach(k=>{ (map[k]=map[k]||[]).push(a); }));
-  const terms = Object.keys(map).sort((a,b)=>a.localeCompare(b,'pl'));
-  if(terms.length===0){ wrap.innerHTML='<div class="hint">Brak haseł.</div>'; return; }
-  let lastLetter = '';
-  terms.forEach(term=>{
-    const letter = term[0].toUpperCase();
-    if(letter!==lastLetter){ const h=document.createElement('div'); h.className='az-letter'; h.textContent=letter; wrap.appendChild(h); lastLetter=letter; }
-    const d = document.createElement('div'); d.className='az-term';
-    d.innerHTML = `${escapeHtml(term)} <span class="az-count">(${map[term].length})</span>`;
-    d.onclick = ()=> showTermArticles(term, map[term]);
-    wrap.appendChild(d);
-  });
-}
-function showTermArticles(term, articles){
-  const wrap = $('#indexList');
-  const box = document.createElement('div'); box.className='card'; box.style.margin='10px 0';
-  box.innerHTML = `<strong>${escapeHtml(term)}</strong>`;
-  articles.forEach(a=> box.appendChild(articleRow(a)));
-  const existing = wrap.querySelector('.term-detail'); if(existing) existing.remove();
-  box.classList.add('term-detail');
-  wrap.insertBefore(box, wrap.firstChild);
-}
-
 /* ============================= SZUKAJ ============================= */
 $('#searchInput').addEventListener('input', doSearch);
 function doSearch(){
   const q = $('#searchInput').value.trim().toLowerCase();
   const res = $('#searchResults'); res.innerHTML='';
   if(!q){ return; }
+  const matchingConceptIds = new Set(CONCEPTS.filter(c=>c.name.toLowerCase().includes(q)).map(c=>c.id));
+  const matchingPersonIds = new Set(PERSONS.filter(p=>p.name.toLowerCase().includes(q)).map(p=>p.id));
   const hits = ARTICLES.filter(a=>{
-    const hay = (a.title+' '+(a.keywords||[]).join(' ')+' '+(a.bodyText||'')).toLowerCase();
-    return hay.includes(q);
+    const hay = (a.title+' '+(a.bodyText||'')).toLowerCase();
+    if(hay.includes(q)) return true;
+    if((a.conceptIds||[]).some(id=>matchingConceptIds.has(id))) return true;
+    if((a.personIds||[]).some(id=>matchingPersonIds.has(id))) return true;
+    return false;
   });
   if(hits.length===0){ res.innerHTML='<div class="hint">Brak wyników.</div>'; return; }
   hits.forEach(a=> res.appendChild(articleRow(a)));
 }
 
-/* ============================= MAPA POJĘĆ (natywna, minimalistyczna) ============================= */
-function renderGraph(){
-  const svg = $('#graphSvg');
-  const kwSet = new Set(); ARTICLES.forEach(a=>(a.keywords||[]).forEach(k=>kwSet.add(k)));
-  const keywords = Array.from(kwSet);
-  if(keywords.length===0){ svg.innerHTML = '<text class="graph-empty-text" x="300" y="260" text-anchor="middle" font-size="13">Brak danych do wizualizacji.</text>'; return; }
-  const CX=300, CY=260, R=200;
-  const kwPos = {};
-  keywords.forEach((k,i)=>{ const ang=(i/keywords.length)*Math.PI*2; kwPos[k]={x:CX+R*Math.cos(ang), y:CY+R*Math.sin(ang)}; });
-  let svgContent = '';
-  ARTICLES.forEach(a=>{
-    const pts = (a.keywords||[]).map(k=>kwPos[k]).filter(Boolean);
-    if(pts.length===0) return;
-    const ax = CX+(pts.reduce((s,p)=>s+p.x,0)/pts.length-CX)*0.55;
-    const ay = CY+(pts.reduce((s,p)=>s+p.y,0)/pts.length-CY)*0.55;
-    pts.forEach(p=>{ svgContent += `<line class="graph-line" x1="${ax}" y1="${ay}" x2="${p.x}" y2="${p.y}" stroke-width="1"/>`; });
-    svgContent += `<circle class="graph-node-article" cx="${ax}" cy="${ay}" r="5" data-article="${a.id}" style="cursor:pointer;"/>`;
-    svgContent += `<text class="graph-art-label" x="${ax+8}" y="${ay+3}" data-article="${a.id}">${escapeHtml(a.title.slice(0,22))}</text>`;
+/* ============================= MAPA POJĘĆ — nawigacja krok-po-kroku (jak The Brain) =============================
+   Zastępuje dawną płaską siatkę współwystępowania słów kluczowych — to nie przebudowa tamtej funkcji, tylko
+   inny mechanizm na tym samym miejscu w interfejsie: punkt wejścia to dwa alfabetyczne indeksy (pojęcia/osoby),
+   klik centruje widok na węźle i pokazuje rodzica, dzieci i wszystkie powiązania z etykietami; klik na sąsiedni
+   węzeł przenosi fokus na niego (z historią "Wstecz"); klik na etykietę powiązania pokazuje artykuły źródłowe. */
+let graphFocusNode = null;
+let graphHistory = [];
+
+function nodeLabel(type, id){
+  if(type==='concept'){ const c = CONCEPTS.find(x=>x.id===id); return c ? c.name : id; }
+  const p = PERSONS.find(x=>x.id===id); return p ? p.name : id;
+}
+
+function renderGraphModule(){
+  document.querySelectorAll('.graph-tab').forEach(btn=> btn.onclick = ()=>{
+    document.querySelectorAll('.graph-tab').forEach(b=>b.classList.toggle('active', b===btn));
+    $('#graphIndexConcepts').style.display = btn.dataset.tab==='concepts' ? '' : 'none';
+    $('#graphIndexPersons').style.display = btn.dataset.tab==='persons' ? '' : 'none';
   });
-  keywords.forEach(k=>{
-    const p = kwPos[k];
-    svgContent += `<circle class="graph-node-kw" cx="${p.x}" cy="${p.y}" r="4" data-term="${escapeHtml(k)}" style="cursor:pointer;"/>`;
-    svgContent += `<text class="graph-kw-label" x="${p.x+7}" y="${p.y+3}" data-term="${escapeHtml(k)}">${escapeHtml(k)}</text>`;
+  renderConceptIndex();
+  renderPersonIndex();
+  renderGraphFocus();
+}
+function renderConceptIndex(){
+  const wrap = $('#graphIndexConcepts'); wrap.innerHTML='';
+  if(CONCEPTS.length===0){ wrap.innerHTML = '<div class="hint">Brak pojęć — wróć wkrótce.</div>'; return; }
+  let lastLetter='';
+  CONCEPTS.slice().sort((a,b)=>a.name.localeCompare(b.name,'pl')).forEach(c=>{
+    const letter = c.name[0].toUpperCase();
+    if(letter!==lastLetter){ const h=document.createElement('div'); h.className='az-letter'; h.textContent=letter; wrap.appendChild(h); lastLetter=letter; }
+    const d = document.createElement('div'); d.className='az-term'; d.textContent = c.name;
+    d.onclick = ()=> focusNode('concept', c.id);
+    wrap.appendChild(d);
   });
-  svg.innerHTML = svgContent;
-  svg.onclick = (e)=>{
-    const artId = e.target.getAttribute('data-article');
-    const term = e.target.getAttribute('data-term');
-    if(artId) openArticle(artId);
-    else if(term){ switchModule('index'); const map={}; ARTICLES.forEach(a=>(a.keywords||[]).forEach(k=>{(map[k]=map[k]||[]).push(a);})); showTermArticles(term, map[term]||[]); }
-  };
+}
+function renderPersonIndex(){
+  const wrap = $('#graphIndexPersons'); wrap.innerHTML='';
+  if(PERSONS.length===0){ wrap.innerHTML = '<div class="hint">Brak osób — wróć wkrótce.</div>'; return; }
+  let lastLetter='';
+  PERSONS.slice().sort((a,b)=>a.name.localeCompare(b.name,'pl')).forEach(p=>{
+    const letter = p.name[0].toUpperCase();
+    if(letter!==lastLetter){ const h=document.createElement('div'); h.className='az-letter'; h.textContent=letter; wrap.appendChild(h); lastLetter=letter; }
+    const d = document.createElement('div'); d.className='az-term'; d.textContent = p.name;
+    d.onclick = ()=> focusNode('person', p.id);
+    wrap.appendChild(d);
+  });
+}
+function focusNode(type, id, opts){
+  opts = opts||{};
+  if(graphFocusNode && !opts.skipHistory) graphHistory.push(graphFocusNode);
+  graphFocusNode = {type, id};
+  renderGraphFocus();
+}
+function focusBack(){
+  if(graphHistory.length===0) return;
+  graphFocusNode = graphHistory.pop();
+  renderGraphFocus();
+}
+function renderGraphFocus(){
+  const wrap = $('#graphFocus');
+  if(!graphFocusNode){ wrap.innerHTML = '<p class="hint">Wybierz pojęcie albo osobę z indeksu powyżej, aby zacząć.</p>'; return; }
+  const {type, id} = graphFocusNode;
+  const name = nodeLabel(type, id);
+
+  let parentHtml = '';
+  if(type==='concept'){
+    const c = CONCEPTS.find(x=>x.id===id);
+    if(c && c.parentId){
+      parentHtml = `<div class="graph-rel-group"><div class="graph-rel-heading">Rodzic</div><span class="graph-node-link" data-focus="concept:${escapeHtml(c.parentId)}">${escapeHtml(nodeLabel('concept', c.parentId))}</span></div>`;
+    }
+  }
+  let childrenHtml = '';
+  if(type==='concept'){
+    const children = CONCEPTS.filter(c=>c.parentId===id).sort((a,b)=>a.name.localeCompare(b.name,'pl'));
+    if(children.length){
+      childrenHtml = `<div class="graph-rel-group"><div class="graph-rel-heading">Dzieci</div>${children.map(c=>`<span class="graph-node-link" data-focus="concept:${escapeHtml(c.id)}">${escapeHtml(c.name)}</span>`).join('')}</div>`;
+    }
+  }
+  const relevant = RELATIONS.filter(r=> (r.fromType===type && r.fromId===id) || (r.toType===type && r.toId===id));
+  let relationsHtml = '';
+  if(relevant.length){
+    relationsHtml = `<div class="graph-rel-group"><div class="graph-rel-heading">Powiązania</div>${relevant.map(r=>{
+      const outgoing = r.fromType===type && r.fromId===id;
+      const otherType = outgoing ? r.toType : r.fromType;
+      const otherId = outgoing ? r.toId : r.fromId;
+      const arrow = outgoing ? '→' : '←';
+      return `<div class="graph-relation-row">
+        <span class="graph-node-link" data-focus="${otherType}:${escapeHtml(otherId)}">${escapeHtml(nodeLabel(otherType, otherId))}</span>
+        <span class="graph-relation-label" data-rel-articles="${escapeHtml(r.id)}" title="Zobacz artykuły źródłowe">${arrow} ${escapeHtml(r.label)} ${arrow}</span>
+      </div>`;
+    }).join('')}</div>`;
+  }
+
+  wrap.innerHTML = `
+    <div class="graph-focus-header">
+      ${graphHistory.length ? `<button class="btn" id="graphBackBtn" type="button">← Wstecz</button>` : ''}
+      <h2 class="graph-focus-name">${escapeHtml(name)} <span class="hint">(${type==='concept'?'pojęcie':'osoba'})</span></h2>
+    </div>
+    ${parentHtml}${childrenHtml}${relationsHtml}
+    ${(!parentHtml && !childrenHtml && !relationsHtml) ? '<p class="hint">Brak powiązań dla tego węzła.</p>' : ''}
+    <div id="graphRelationArticles"></div>
+  `;
+  if(graphHistory.length){ $('#graphBackBtn').onclick = focusBack; }
+  wrap.querySelectorAll('[data-focus]').forEach(el=>{
+    el.onclick = ()=>{ const [t,i] = el.dataset.focus.split(':'); focusNode(t, i); };
+  });
+  wrap.querySelectorAll('[data-rel-articles]').forEach(el=>{
+    el.onclick = ()=> showRelationArticles(el.dataset.relArticles);
+  });
+}
+function showRelationArticles(relationId){
+  const rel = RELATIONS.find(r=>r.id===relationId);
+  const box = $('#graphRelationArticles');
+  if(!rel){ box.innerHTML=''; return; }
+  const arts = (rel.articleIds||[]).map(aid=> ARTICLES.find(a=>a.id===aid)).filter(Boolean);
+  box.innerHTML = `<div class="card" style="margin-top:10px;"><strong>Źródła: „${escapeHtml(rel.label)}"</strong></div>`;
+  const cardWrap = box.querySelector('.card');
+  if(arts.length===0){ cardWrap.insertAdjacentHTML('beforeend', '<div class="hint" style="margin-top:6px;">Brak przypisanych artykułów.</div>'); return; }
+  arts.forEach(a=> cardWrap.appendChild(articleRow(a)));
+}
+/* Wywoływane z widoku artykułu (openArticle) po kliknięciu przypisanego pojęcia/osoby. */
+function openGraphAt(type, id){
+  switchModule('graph');
+  graphHistory = [];
+  focusNode(type, id, {skipHistory:true});
 }
 
 /* ============================= WYKAZ ŹRÓDEŁ ============================= */
@@ -444,9 +527,13 @@ function openArticle(id){
   $('#articleSeal').src = SEAL_IMG;
   $('#articleTitle').textContent = a.title;
   $('#articleMetaLine').textContent = [a.author, a.category].filter(Boolean).join(' · ');
-  $('#articleKeywords').innerHTML = (a.keywords||[]).map(k=>`<span class="keyword-tag">${escapeHtml(k)}</span>`).join('');
-  $('#articleKeywords').querySelectorAll('.keyword-tag').forEach(el=>{
-    el.onclick = ()=>{ const term=el.textContent; switchModule('index'); const map={}; ARTICLES.forEach(x=>(x.keywords||[]).forEach(k=>{(map[k]=map[k]||[]).push(x);})); showTermArticles(term, map[term]||[]); };
+  const tagsHtml = [
+    ...(a.conceptIds||[]).filter(cid=> CONCEPTS.some(c=>c.id===cid)).map(cid=> `<span class="keyword-tag" data-focus="concept:${escapeHtml(cid)}">${escapeHtml(nodeLabel('concept', cid))}</span>`),
+    ...(a.personIds||[]).filter(pid=> PERSONS.some(p=>p.id===pid)).map(pid=> `<span class="keyword-tag" data-focus="person:${escapeHtml(pid)}">${escapeHtml(nodeLabel('person', pid))}</span>`)
+  ].join('');
+  $('#articleKeywords').innerHTML = tagsHtml;
+  $('#articleKeywords').querySelectorAll('[data-focus]').forEach(el=>{
+    el.onclick = ()=>{ const [t,i] = el.dataset.focus.split(':'); openGraphAt(t, i); };
   });
   $('#articlePdfLink').innerHTML = a.pdfBase64 ? `<a class="btn" href="${a.pdfBase64}" download="${escapeHtml(a.signature||a.title)}.pdf">Pobierz PDF</a>` : '';
   $('#articleBody').innerHTML = a.bodyHtml || '';
