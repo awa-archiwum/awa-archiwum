@@ -297,7 +297,16 @@ async function loadAllData(){
     fetchJson('data/persons.json', {persons:[]}),
     fetchJson('data/relations.json', {relations:[]})
   ]);
-  ARTICLES = (articlesData.articles||[]).slice().sort((a,b)=> new Date(b.importedAt)-new Date(a.importedAt));
+  // Filtr publikacji: tylko status==='published' trafia do ARTICLES, więc każde
+  // miejsce w tym pliku, które czyta ARTICLES, automatycznie respektuje status bez
+  // osobnej kontroli w każdym z nich - jedyny wyjątek to relacje w Mapie Pojęć
+  // (relation.articleIds), które trzeba sprawdzać osobno, bo indeksują RELATIONS,
+  // nie ARTICLES (patrz renderGraphFocus() niżej). Artykuły sprzed dodania statusu
+  // (brak pola status) traktowane jako 'published' - ta sama, świadoma decyzja
+  // migracji co w panelu admina (listArticles()), nie domysł ukryty w kodzie.
+  ARTICLES = (articlesData.articles||[])
+    .filter(a=> (a.status||'published')==='published')
+    .sort((a,b)=> new Date(b.importedAt)-new Date(a.importedAt));
   BOOKS = (booksData.books||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
   PLAYLISTS = (playlistsData.playlists||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
   CHANNEL_URL = channelData.url || '';
@@ -445,7 +454,18 @@ function renderGraphFocus(){
       childrenHtml = `<div class="graph-rel-group"><div class="graph-rel-heading">Dzieci</div>${children.map(c=>`<span class="graph-node-link" data-focus="concept:${escapeHtml(c.id)}">${escapeHtml(c.name)}</span>`).join('')}</div>`;
     }
   }
-  const relevant = RELATIONS.filter(r=> (r.fromType===type && r.fromId===id) || (r.toType===type && r.toId===id));
+  // Relacja pokazuje link do artykułów źródłowych (articleIds) niżej - jeśli
+  // WSZYSTKIE dokumentujące ją artykuły są robocze (odfiltrowane już z ARTICLES),
+  // relacja znika tu całkowicie, nie tylko traci klikalne źródło. Inaczej odwiedzający
+  // widziałby powiązanie bez możliwości sprawdzenia skąd się wzięło - gorsze niż jego
+  // brak, i tylna furtka ujawniająca istnienie artykułu roboczego przez samą etykietę
+  // relacji. (Relacje w tym modelu zawsze mają >=1 articleId - panel admina usuwa
+  // relację całkowicie, gdy traci ostatni artykuł źródłowy - więc "brak articleIds"
+  // nie jest tu odrębnym, legalnym stanem do rozróżnienia od "wszystkie robocze".)
+  const relevant = RELATIONS.filter(r=>
+    ((r.fromType===type && r.fromId===id) || (r.toType===type && r.toId===id)) &&
+    (r.articleIds||[]).some(aid=> ARTICLES.some(a=>a.id===aid))
+  );
   let relationsHtml = '';
   if(relevant.length){
     relationsHtml = `<div class="graph-rel-group"><div class="graph-rel-heading">Powiązania</div>${relevant.map(r=>{
