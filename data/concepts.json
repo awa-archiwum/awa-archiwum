@@ -1,1 +1,58 @@
-{"concepts":[]}
+{
+  "concepts": [
+    {
+      "id": "concept_gnoza_msx83lor",
+      "name": "gnoza",
+      "parentId": "concept_mysterium-iniquitatis_msx80wt8",
+      "description": ""
+    },
+    {
+      "id": "concept_kabaa_msx83g0z",
+      "name": "kabała",
+      "parentId": "concept_mysterium-iniquitatis_msx80wt8",
+      "description": ""
+    },
+    {
+      "id": "concept_modernitas_msx815mj",
+      "name": "modernitas",
+      "parentId": null,
+      "description": ""
+    },
+    {
+      "id": "concept_modernizm_msx840dn",
+      "name": "modernizm",
+      "parentId": "concept_modernitas_msx815mj",
+      "description": ""
+    },
+    {
+      "id": "concept_mysterium-iniquitatis_msx80wt8",
+      "name": "mysterium iniquitatis",
+      "parentId": null,
+      "description": ""
+    },
+    {
+      "id": "concept_mesjanizm_msx9j9n4",
+      "name": "mesjanizm",
+      "parentId": "concept_modernitas_msx815mj",
+      "description": ""
+    },
+    {
+      "id": "concept_nacjonalizm_msx9jk2g",
+      "name": "nacjonalizm",
+      "parentId": "concept_modernitas_msx815mj",
+      "description": ""
+    },
+    {
+      "id": "concept_alchemia_msx9jv88",
+      "name": "alchemia",
+      "parentId": "concept_mysterium-iniquitatis_msx80wt8",
+      "description": ""
+    },
+    {
+      "id": "concept_okultyzm_msx9k468",
+      "name": "okultyzm",
+      "parentId": null,
+      "description": ""
+    }
+  ]
+}

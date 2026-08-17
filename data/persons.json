@@ -1,1 +1,54 @@
-{"persons":[]}
+{
+  "persons": [
+    {
+      "id": "person_adam-mickiewicz_msx888z6",
+      "name": "Adam Mickiewicz",
+      "note": ""
+    },
+    {
+      "id": "person_henry-de-lubac_msx87seb",
+      "name": "Henry De Lubac",
+      "note": ""
+    },
+    {
+      "id": "person_isaac-newton_msx86nkj",
+      "name": "Isaac Newton",
+      "note": ""
+    },
+    {
+      "id": "person_jerzy-braun_msx895c3",
+      "name": "Jerzy Braun",
+      "note": ""
+    },
+    {
+      "id": "person_moses-dobrushka_msx85wfv",
+      "name": "Moses Dobrushka",
+      "note": ""
+    },
+    {
+      "id": "person_sabbatai-zewi_msx85m17",
+      "name": "Sabbatai Zewi",
+      "note": ""
+    },
+    {
+      "id": "person_teillhard-de-chardin_msx881i3",
+      "name": "Teillhard De Chardin",
+      "note": ""
+    },
+    {
+      "id": "person_jakub-frank_msx9ke9k",
+      "name": "Jakub Frank",
+      "note": ""
+    },
+    {
+      "id": "person_woltaire_msx9kqcf",
+      "name": "Woltaire",
+      "note": ""
+    },
+    {
+      "id": "person_heggel_msx9kw0w",
+      "name": "Heggel",
+      "note": ""
+    }
+  ]
+}

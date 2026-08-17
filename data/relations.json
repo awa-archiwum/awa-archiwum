@@ -1,1 +1,81 @@
-{"relations":[]}
+{
+  "relations": [
+    {
+      "id": "rel_msx8hp5md3fw",
+      "fromType": "person",
+      "fromId": "person_adam-mickiewicz_msx888z6",
+      "toType": "person",
+      "toId": "person_jerzy-braun_msx895c3",
+      "label": "inspiracja dla",
+      "articleIds": [
+        "art_awa2026001"
+      ]
+    },
+    {
+      "id": "rel_msx9n1lrm1nf",
+      "fromType": "person",
+      "fromId": "person_sabbatai-zewi_msx85m17",
+      "toType": "person",
+      "toId": "person_jakub-frank_msx9ke9k",
+      "label": "inspiracja dla",
+      "articleIds": [
+        "art_awa2026001"
+      ]
+    },
+    {
+      "id": "rel_msx9nkwgs1w7",
+      "fromType": "person",
+      "fromId": "person_moses-dobrushka_msx85wfv",
+      "toType": "person",
+      "toId": "person_jakub-frank_msx9ke9k",
+      "label": "inspiracja dla",
+      "articleIds": [
+        "art_awa2026001"
+      ]
+    },
+    {
+      "id": "rel_msx9o7z3k9t8",
+      "fromType": "concept",
+      "fromId": "concept_okultyzm_msx9k468",
+      "toType": "person",
+      "toId": "person_woltaire_msx9kqcf",
+      "label": "inspiracja dla",
+      "articleIds": [
+        "art_awa2026001"
+      ]
+    },
+    {
+      "id": "rel_msx9ox6n2dhp",
+      "fromType": "concept",
+      "fromId": "concept_kabaa_msx83g0z",
+      "toType": "person",
+      "toId": "person_isaac-newton_msx86nkj",
+      "label": "inspiracja dla",
+      "articleIds": [
+        "art_awa2026001"
+      ]
+    },
+    {
+      "id": "rel_msx9pxqv3g8x",
+      "fromType": "concept",
+      "fromId": "concept_mysterium-iniquitatis_msx80wt8",
+      "toType": "concept",
+      "toId": "concept_okultyzm_msx9k468",
+      "label": "inspiracja dla",
+      "articleIds": [
+        "art_awa2026001"
+      ]
+    },
+    {
+      "id": "rel_msx9qmb32nii",
+      "fromType": "concept",
+      "fromId": "concept_kabaa_msx83g0z",
+      "toType": "concept",
+      "toId": "concept_mesjanizm_msx9j9n4",
+      "label": "inspiracja dla",
+      "articleIds": [
+        "art_awa2026001"
+      ]
+    }
+  ]
+}
