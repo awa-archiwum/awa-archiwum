@@ -15,6 +15,7 @@
 })();
 </script>
 <title>Archiwum Wielkiej Apostazji</title>
+<link rel="alternate" type="application/rss+xml" title="Archiwum Wielkiej Apostazji — nowe artykuły" href="data/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -145,6 +146,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <div id="topbar">
       <h2>Archiwum</h2>
       <div class="spacer"></div>
+      <a class="btn" id="rssLink" href="data/feed.xml" title="Kanał RSS — nowe artykuły" aria-label="Kanał RSS">RSS</a>
       <button class="btn" id="themeToggleBtn" aria-label="Przełącz tryb jasny/ciemny"></button>
     </div>
 
@@ -318,6 +320,11 @@ async function loadAllData(){
 /* ============================= NAWIGACJA ============================= */
 document.querySelectorAll('.nav-item').forEach(n=> n.onclick = ()=> switchModule(n.dataset.mod));
 function switchModule(name){
+  // Every top-level nav module clears any ?article=… left in the URL by a
+  // previous openArticle() — otherwise a page refresh while browsing e.g.
+  // "Mapa pojęć" would incorrectly reopen the last-viewed article instead
+  // (see the ?article= check in loadAllData().then(...) below).
+  if(location.search) history.replaceState(null, '', location.pathname);
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x.dataset.mod===name));
   document.querySelectorAll('.module').forEach(m=>m.classList.toggle('active', m.id==='mod-'+name));
   if(name==='start') renderStart();
@@ -536,9 +543,17 @@ function renderSources(){
 }
 
 /* ============================= WIDOK ARTYKUŁU ============================= */
-function openArticle(id){
+// skipPush: used by the popstate handler and the initial ?article=… load
+// below, where the URL already reflects this article and pushing again
+// would create a duplicate, un-back-out-of-able history entry.
+function openArticle(id, skipPush){
   const a = ARTICLES.find(x=>x.id===id);
   if(!a) return;
+  if(!skipPush){
+    const url = new URL(location.href);
+    url.searchParams.set('article', id);
+    history.pushState({article:id}, '', url);
+  }
   document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
   document.querySelectorAll('.module').forEach(m=>m.classList.toggle('active', m.id==='mod-article'));
   $('#articleBreadcrumb').innerHTML = `<span data-nav="browse">Przeglądarka</span> / ${escapeHtml(a.category||'Bez kategorii')} / ${escapeHtml(a.signature||'')}`;
@@ -652,7 +667,20 @@ function renderPlaylists(){
 }
 
 /* init */
-loadAllData().then(renderStart);
+// A fresh load with ?article=<id> in the URL (an RSS item link, or a
+// shared/bookmarked article link) opens that article directly instead of
+// the dashboard — RSS <link> values point at exactly this URL shape
+// (SITE_URL + '?article=' + id, see the admin panel's articleFeedLink()).
+loadAllData().then(()=>{
+  const articleId = new URLSearchParams(location.search).get('article');
+  if(articleId && ARTICLES.some(a=>a.id===articleId)) openArticle(articleId, true);
+  else renderStart();
+});
+window.addEventListener('popstate', ()=>{
+  const articleId = new URLSearchParams(location.search).get('article');
+  if(articleId && ARTICLES.some(a=>a.id===articleId)) openArticle(articleId, true);
+  else switchModule('start');
+});
 </script>
 </body>
 </html>
