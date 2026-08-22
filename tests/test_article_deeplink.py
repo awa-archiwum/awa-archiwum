@@ -55,6 +55,7 @@ FIXTURE = {
     "concepts": {"concepts": []},
     "persons": {"persons": []},
     "relations": {"relations": []},
+    "epochs": {"epochs": []},
 }
 
 site_dir = HERE / "_test_deeplink_site"

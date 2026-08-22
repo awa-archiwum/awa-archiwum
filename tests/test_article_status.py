@@ -74,6 +74,7 @@ FIXTURE = {
         {"id": "rel_mixed", "fromType": "concept", "fromId": "concept_apostazja", "toType": "concept",
          "toId": "concept_grzech", "label": "mieszana-relacja", "articleIds": ["art_draft", "art_published"]},
     ]},
+    "epochs": {"epochs": []},
 }
 
 # --- isolated temp site: copy of index.html + fixture data, never the real data/ folder ---

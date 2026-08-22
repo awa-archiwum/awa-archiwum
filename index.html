@@ -108,6 +108,24 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 .graph-relation-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wine-bright);cursor:pointer;border-bottom:1px dotted var(--wine-bright);}
 .graph-relation-label:hover{color:var(--gold-bright);border-color:var(--gold-bright);}
 
+/* oś czasu — trzy poziomy przybliżenia (skopiowane wizualnie z panelu admina, ten sam plik CSS,
+   te same nazwy zmiennych kolorów — nie 1:1 kopiowany kod JS poniżej, bo dane tu są już
+   przefiltrowane do published przy wczytaniu, patrz loadAllData()) */
+.timeline-epoch-row{display:flex;gap:10px;flex-wrap:wrap;}
+.timeline-epoch-block{flex:1 1 150px;min-width:150px;border:1px solid var(--line-bright);border-radius:8px;background:var(--surface);padding:16px 12px;text-align:center;cursor:pointer;}
+.timeline-epoch-block:hover{border-color:var(--gold);}
+.timeline-epoch-block .tl-name{font-family:'Fraunces',serif;font-size:14px;color:var(--gold-bright);}
+.timeline-epoch-block .tl-count{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--ink);margin-top:6px;}
+.timeline-epoch-block .tl-range{font-size:10.5px;color:var(--muted);margin-top:4px;}
+.timeline-decade-group{margin-bottom:18px;}
+.timeline-decade-heading{font-family:'Fraunces',serif;font-size:15px;color:var(--gold-bright);border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:8px;}
+.timeline-year-row{display:flex;gap:8px;flex-wrap:wrap;}
+.timeline-year-chip{border:1px solid var(--line-bright);border-radius:6px;background:var(--surface);padding:8px 12px;cursor:pointer;font-size:13px;text-align:center;min-width:64px;}
+.timeline-year-chip:hover{border-color:var(--gold);}
+.timeline-year-chip .tl-count{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px;}
+.timeline-calendar-row{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:8px 10px;margin-bottom:8px;font-size:12.5px;cursor:pointer;}
+.timeline-calendar-row:hover{border-color:var(--gold);}
+
 /* książki */
 .book-card{display:flex;gap:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;margin-bottom:12px;}
 .book-cover{width:76px;height:108px;min-width:76px;border-radius:4px;object-fit:cover;background:var(--surface2);border:1px solid var(--line-bright);box-shadow:0 3px 10px rgba(0,0,0,.35);}
@@ -138,6 +156,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <div class="nav-item" data-mod="browse">Przeglądarka</div>
     <div class="nav-item" data-mod="search">Szukaj</div>
     <div class="nav-item" data-mod="graph">Mapa pojęć</div>
+    <div class="nav-item" data-mod="timeline">Oś czasu</div>
     <div class="nav-item" data-mod="sources">Wykaz źródeł</div>
     <div class="nav-item" data-mod="books">Książki</div>
     <div class="nav-item" data-mod="channel">Kanał YT</div>
@@ -188,6 +207,14 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
       <div id="graphIndexConcepts" class="graph-index"></div>
       <div id="graphIndexPersons" class="graph-index" style="display:none;"></div>
       <div id="graphFocus" class="graph-focus"></div>
+    </div>
+
+    <!-- OŚ CZASU -->
+    <div class="module" id="mod-timeline">
+      <h1 class="pagetitle">Oś czasu</h1>
+      <p class="pagesub">Klasyfikacja chronologiczna, prostopadła do Mapy Pojęć (tematycznej) — nad tymi samymi artykułami. Co wydarzyło się w danym roku, w obrębie wybranej epoki.</p>
+      <div id="timelineBreadcrumb" class="breadcrumb" style="margin-bottom:10px;"></div>
+      <div id="timelineView"></div>
     </div>
 
     <!-- WYKAZ ŹRÓDEŁ -->
@@ -280,6 +307,7 @@ let CHANNEL_URL = '';
 let CONCEPTS = [];
 let PERSONS = [];
 let RELATIONS = [];
+let EPOCHS = [];
 
 async function fetchJson(path, fallback){
   try{
@@ -290,14 +318,15 @@ async function fetchJson(path, fallback){
 }
 
 async function loadAllData(){
-  const [articlesData, booksData, playlistsData, channelData, conceptsData, personsData, relationsData] = await Promise.all([
+  const [articlesData, booksData, playlistsData, channelData, conceptsData, personsData, relationsData, epochsData] = await Promise.all([
     fetchJson('data/articles.json', {articles:[]}),
     fetchJson('data/books.json', {books:[]}),
     fetchJson('data/playlists.json', {playlists:[]}),
     fetchJson('data/channel.json', {url:''}),
     fetchJson('data/concepts.json', {concepts:[]}),
     fetchJson('data/persons.json', {persons:[]}),
-    fetchJson('data/relations.json', {relations:[]})
+    fetchJson('data/relations.json', {relations:[]}),
+    fetchJson('data/epochs.json', {epochs:[]})
   ]);
   // Filtr publikacji: tylko status==='published' trafia do ARTICLES, więc każde
   // miejsce w tym pliku, które czyta ARTICLES, automatycznie respektuje status bez
@@ -315,6 +344,7 @@ async function loadAllData(){
   CONCEPTS = conceptsData.concepts||[];
   PERSONS = personsData.persons||[];
   RELATIONS = relationsData.relations||[];
+  EPOCHS = (epochsData.epochs||[]).slice().sort((a,b)=>(a.order??0)-(b.order??0));
 }
 
 /* ============================= NAWIGACJA ============================= */
@@ -330,6 +360,7 @@ function switchModule(name){
   if(name==='start') renderStart();
   if(name==='browse') renderBrowse();
   if(name==='graph') renderGraphModule();
+  if(name==='timeline'){ timelineLevel = 1; timelineEpochId = null; timelineYear = null; renderTimeline(); }
   if(name==='sources') renderSources();
   if(name==='books') renderBooks();
   if(name==='channel'){ renderChannelLink(); renderPlaylists(); }
@@ -585,6 +616,144 @@ function openGraphAt(type, id){
   switchModule('graph');
   graphHistory = [];
   focusNode(type, id, {skipHistory:true});
+}
+
+/* ============================= OŚ CZASU (trzy poziomy przybliżenia) =============================
+   Ten sam mechanizm co w panelu admina (Krok 4, poprzednia tura) — tam osobny komentarz tłumaczy
+   dlaczego "reużyj ?article=<id>" nie miało tam zastosowania (panel nie ma routingu przez URL).
+   TUTAJ jest inaczej: ta strona MA prawdziwy, działający deep-link ?article=<id>
+   (openArticle()/history.pushState wyżej) — więc to faktycznie ten sam mechanizm, użyty wprost,
+   bez potrzeby żadnego zamiennika. ARTICLES jest tu już przefiltrowane do status==='published'
+   (loadAllData()) — dokładnie ta sama logika poziomów 1-3 co w panelu admina działa więc
+   poprawnie bez żadnego dodatkowego filtra wpisanego w kod niżej (ten sam zweryfikowany wcześniej
+   wzorzec: "Mapa Pojęć" i "Korpusy" już to potwierdziły, nic tu nowego nie trzeba wymyślać). */
+let timelineLevel = 1;
+let timelineEpochId = null; // null = pseudo-epoka "Bez epoki"
+let timelineYear = null;
+
+function timelineAllDateRefs(){
+  const out = [];
+  ARTICLES.forEach(a=> (a.dateRefs||[]).forEach(dr=> out.push({dr, article:a})));
+  return out;
+}
+function timelineEpochLabel(epochId){
+  if(epochId===null) return 'Bez epoki';
+  const e = EPOCHS.find(x=>x.id===epochId);
+  return e ? e.name : epochId;
+}
+function renderTimelineBreadcrumb(){
+  const bc = $('#timelineBreadcrumb');
+  const parts = [`<span data-tl-level="1">Oś epok</span>`];
+  if(timelineLevel>=2) parts.push(`<span data-tl-level="2">${escapeHtml(timelineEpochLabel(timelineEpochId))}</span>`);
+  if(timelineLevel>=3) parts.push(`<span data-tl-level="3">${timelineYear}</span>`);
+  bc.innerHTML = parts.join(' / ');
+  bc.querySelectorAll('[data-tl-level]').forEach(el=>{
+    el.onclick = ()=>{
+      const lvl = Number(el.dataset.tlLevel);
+      if(lvl===timelineLevel) return;
+      timelineLevel = lvl;
+      if(lvl<3) timelineYear = null;
+      if(lvl<2) timelineEpochId = null;
+      renderTimeline();
+    };
+  });
+}
+function renderTimeline(){
+  renderTimelineBreadcrumb();
+  if(timelineLevel===1) renderTimelineLevel1();
+  else if(timelineLevel===2) renderTimelineLevel2();
+  else renderTimelineLevel3();
+}
+function renderTimelineLevel1(){
+  const wrap = $('#timelineView');
+  const blocks = EPOCHS.map(e=>({id:e.id, name:e.name, range:[e.startApprox,e.endApprox].filter(Boolean).join(' – '), count:0}));
+  const noEpochBlock = {id:null, name:'Bez epoki', range:'', count:0};
+  timelineAllDateRefs().forEach(({dr})=>{
+    const target = dr.epochId ? blocks.find(b=>b.id===dr.epochId) : null;
+    if(target) target.count++; else noEpochBlock.count++;
+  });
+  const allBlocks = noEpochBlock.count>0 ? blocks.concat([noEpochBlock]) : blocks;
+  if(allBlocks.length===0){
+    wrap.innerHTML = '<div class="hint">Brak jeszcze żadnych odniesień czasowych — wróć wkrótce.</div>';
+    return;
+  }
+  wrap.innerHTML = `<div class="timeline-epoch-row">${allBlocks.map(b=>`
+    <div class="timeline-epoch-block" data-epoch="${b.id===null?'':escapeHtml(b.id)}">
+      <div class="tl-name">${escapeHtml(b.name)}</div>
+      <div class="tl-count">${b.count}</div>
+      ${b.range?`<div class="tl-range">${escapeHtml(b.range)}</div>`:''}
+    </div>
+  `).join('')}</div>`;
+  wrap.querySelectorAll('[data-epoch]').forEach(el=>{
+    el.onclick = ()=>{
+      timelineEpochId = el.dataset.epoch === '' ? null : el.dataset.epoch;
+      timelineLevel = 2;
+      renderTimeline();
+    };
+  });
+}
+function renderTimelineLevel2(){
+  const wrap = $('#timelineView');
+  const refs = timelineAllDateRefs().filter(({dr})=> (timelineEpochId===null ? !dr.epochId : dr.epochId===timelineEpochId));
+  if(refs.length===0){ wrap.innerHTML = '<div class="hint">Brak odniesień czasowych w tej epoce.</div>'; return; }
+  const withYear = refs.filter(({dr})=> dr.year!=null);
+  const withoutYear = refs.filter(({dr})=> dr.year==null);
+
+  const yearCounts = {};
+  withYear.forEach(({dr})=>{ yearCounts[dr.year] = (yearCounts[dr.year]||0) + 1; });
+  const years = Object.keys(yearCounts).map(Number).sort((a,b)=>a-b);
+  const byDecade = {};
+  years.forEach(y=>{ const d = Math.floor(y/10)*10; (byDecade[d]=byDecade[d]||[]).push(y); });
+  const decades = Object.keys(byDecade).map(Number).sort((a,b)=>a-b);
+
+  let html = '';
+  decades.forEach(d=>{
+    const decadeYears = byDecade[d];
+    const decadeTotal = decadeYears.reduce((s,y)=>s+yearCounts[y],0);
+    html += `<div class="timeline-decade-group">
+      <div class="timeline-decade-heading">${d} – ${d+9} (${decadeTotal})</div>
+      <div class="timeline-year-row">${decadeYears.map(y=>`
+        <div class="timeline-year-chip" data-year="${y}">${y}<span class="tl-count">${yearCounts[y]}</span></div>
+      `).join('')}</div>
+    </div>`;
+  });
+  if(withoutYear.length){
+    html += `<div class="timeline-decade-group">
+      <div class="timeline-decade-heading">Bez konkretnej daty (${withoutYear.length})</div>
+      ${withoutYear.map(({dr,article})=>`
+        <div class="timeline-calendar-row" data-open-article="${escapeHtml(article.id)}">
+          <strong>${escapeHtml(dr.label)}</strong>
+          <div class="hint">${escapeHtml(article.title)}${dr.approximate?' · przybliżone':''}</div>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+  wrap.innerHTML = html;
+  wrap.querySelectorAll('[data-year]').forEach(el=>{
+    el.onclick = ()=>{ timelineYear = Number(el.dataset.year); timelineLevel = 3; renderTimeline(); };
+  });
+  wrap.querySelectorAll('[data-open-article]').forEach(el=>{
+    el.onclick = ()=> openArticle(el.dataset.openArticle);
+  });
+}
+function renderTimelineLevel3(){
+  const wrap = $('#timelineView');
+  const refs = timelineAllDateRefs().filter(({dr})=>{
+    if(timelineEpochId===null ? !!dr.epochId : dr.epochId!==timelineEpochId) return false;
+    if(dr.year==null) return false;
+    const end = dr.yearEnd!=null ? dr.yearEnd : dr.year;
+    return timelineYear>=dr.year && timelineYear<=end;
+  });
+  if(refs.length===0){ wrap.innerHTML = '<div class="hint">Brak odniesień czasowych w tym roku.</div>'; return; }
+  wrap.innerHTML = refs.map(({dr,article})=>`
+    <div class="timeline-calendar-row" data-open-article="${escapeHtml(article.id)}">
+      <strong>${escapeHtml(dr.label)}</strong>
+      <div class="hint">${escapeHtml(article.title)}${dr.approximate?' · przybliżone':''}${dr.note?' · '+escapeHtml(dr.note):''}</div>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('[data-open-article]').forEach(el=>{
+    el.onclick = ()=> openArticle(el.dataset.openArticle);
+  });
 }
 
 /* ============================= WYKAZ ŹRÓDEŁ ============================= */
