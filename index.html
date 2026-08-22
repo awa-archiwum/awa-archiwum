@@ -174,7 +174,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
       <div class="hero">
         <img id="heroImg" alt="Pieczęć Archiwum Wielkiej Apostazji na marmurze">
       </div>
-      <p class="pagesub" style="margin-top:14px;">Zaplecze referencyjne dla książek AWA — pojęcia, argumenty i źródła skatalogowane i możliwe do samodzielnej weryfikacji.</p>
+      <p class="pagesub" id="siteTaglineText" style="margin-top:14px;"></p>
       <div class="card" style="margin-bottom:18px;">
         <div id="startStats" class="hint"></div>
       </div>
@@ -304,6 +304,12 @@ let ARTICLES = [];
 let BOOKS = [];
 let PLAYLISTS = [];
 let CHANNEL_URL = '';
+// Ten sam tekst, który dawniej był tu zaszyty na sztywno — teraz tylko domyślny fallback,
+// gdy nikt jeszcze nie ustawił własnego opisu w panelu (channel.json.tagline, patrz
+// loadAllData() niżej). Musi zostać identyczny z DEFAULT_SITE_TAGLINE w panelu admina —
+// to ta sama wartość domyślna widziana z dwóch stron tego samego pliku danych.
+const DEFAULT_SITE_TAGLINE = 'Zaplecze referencyjne dla książek AWA — pojęcia, argumenty i źródła skatalogowane i możliwe do samodzielnej weryfikacji.';
+let SITE_TAGLINE = DEFAULT_SITE_TAGLINE;
 let CONCEPTS = [];
 let PERSONS = [];
 let RELATIONS = [];
@@ -341,6 +347,7 @@ async function loadAllData(){
   BOOKS = (booksData.books||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
   PLAYLISTS = (playlistsData.playlists||[]).slice().sort((a,b)=> new Date(b.addedAt)-new Date(a.addedAt));
   CHANNEL_URL = channelData.url || '';
+  SITE_TAGLINE = channelData.tagline || DEFAULT_SITE_TAGLINE;
   CONCEPTS = conceptsData.concepts||[];
   PERSONS = personsData.persons||[];
   RELATIONS = relationsData.relations||[];
@@ -368,6 +375,7 @@ function switchModule(name){
 
 /* ============================= START ============================= */
 function renderStart(){
+  $('#siteTaglineText').textContent = SITE_TAGLINE;
   $('#startStats').textContent = `Jednostek archiwalnych: ${ARTICLES.length} · Pojęć: ${CONCEPTS.length} · Osób: ${PERSONS.length} · Powiązań: ${RELATIONS.length}`;
   const list = $('#recentList'); list.innerHTML='';
   ARTICLES.slice(0,8).forEach(a=> list.appendChild(articleRow(a)));
