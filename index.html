@@ -395,6 +395,18 @@ function nodeLabel(type, id){
   if(type==='concept'){ const c = CONCEPTS.find(x=>x.id===id); return c ? c.name : id; }
   const p = PERSONS.find(x=>x.id===id); return p ? p.name : id;
 }
+// Sam tekst co awa-archiwum-admin.html (tam ma drugi param `concepts` bo zyje w
+// module edycji drzewa pojec obok innych funkcji przyjmujacych ta tablice jawnie;
+// tutaj CONCEPTS jest jedynym zrodlem, wiec bez dodatkowego parametru).
+function getConceptDescendantIds(id){
+  const result = new Set();
+  const stack = [id];
+  while(stack.length){
+    const cur = stack.pop();
+    CONCEPTS.forEach(c=>{ if(c.parentId===cur && !result.has(c.id)){ result.add(c.id); stack.push(c.id); } });
+  }
+  return result;
+}
 
 function renderGraphModule(){
   document.querySelectorAll('.graph-tab').forEach(btn=> btn.onclick = ()=>{
@@ -487,15 +499,69 @@ function renderGraphFocus(){
     }).join('')}</div>`;
   }
 
+  // "Artykuły z tym hasłem" -- artykuły przypisane wprost (conceptIds/personIds),
+  // niezaleznie od relacji. ARTICLES jest tu juz przefiltrowane do status==='published'
+  // (patrz init), wiec zaden dodatkowy filtr nie jest potrzebny -- ten sam kod co w
+  // panelu admina, inne (juz przefiltrowane) ARTICLES.
+  const taggedField = type==='concept' ? 'conceptIds' : 'personIds';
+  const taggedArticles = ARTICLES.filter(a=> (a[taggedField]||[]).includes(id));
+  let taggedHtml = '';
+  if(taggedArticles.length){
+    taggedHtml = `<div class="graph-rel-group"><div class="zespol-title">Artykuły z tym hasłem</div><div id="graphTaggedArticles"></div></div>`;
+  }
+
+  // Zbiorczy widok korpusu -- tylko gdy wezel jest korzeniem (concept.parentId===null).
+  // Ten sam mechanizm co w panelu admina (patrz jego renderGraphFocus()), rozgrupowany
+  // wg galezi przez getConceptDescendantIds() ponizej.
+  let corpusRollup = null;
+  if(type==='concept'){
+    const c = CONCEPTS.find(x=>x.id===id);
+    if(c && !c.parentId){
+      const corpusArticles = ARTICLES.filter(a=>a.corpusId===id);
+      const directChildren = CONCEPTS.filter(x=>x.parentId===id).sort((a,b)=>a.name.localeCompare(b.name,'pl'));
+      const branches = directChildren.map(child=>{
+        const branchIds = new Set([child.id, ...getConceptDescendantIds(child.id)]);
+        const articles = corpusArticles.filter(a=> (a.conceptIds||[]).some(cid=>branchIds.has(cid)));
+        return { child, articles };
+      }).filter(b=>b.articles.length);
+      const taggedElsewhereIds = new Set(branches.flatMap(b=>b.articles.map(a=>a.id)));
+      const untaggedArticles = corpusArticles.filter(a=>!taggedElsewhereIds.has(a.id));
+      corpusRollup = { corpusArticles, branches, untaggedArticles };
+    }
+  }
+  let corpusHtml = '';
+  if(corpusRollup && corpusRollup.corpusArticles.length){
+    corpusHtml = `<div class="graph-rel-group"><div class="zespol-title">Wszystkie artykuły korpusu „${escapeHtml(name)}”</div><div id="graphCorpusRollup"></div></div>`;
+  }
+
   wrap.innerHTML = `
     <div class="graph-focus-header">
       ${graphHistory.length ? `<button class="btn" id="graphBackBtn" type="button">← Wstecz</button>` : ''}
       <h2 class="graph-focus-name">${escapeHtml(name)} <span class="hint">(${type==='concept'?'pojęcie':'osoba'})</span></h2>
     </div>
-    ${parentHtml}${childrenHtml}${relationsHtml}
-    ${(!parentHtml && !childrenHtml && !relationsHtml) ? '<p class="hint">Brak powiązań dla tego węzła.</p>' : ''}
+    ${parentHtml}${childrenHtml}${relationsHtml}${taggedHtml}${corpusHtml}
+    ${(!parentHtml && !childrenHtml && !relationsHtml && !taggedHtml && !corpusHtml) ? '<p class="hint">Brak powiązań dla tego węzła.</p>' : ''}
     <div id="graphRelationArticles"></div>
   `;
+  if(taggedArticles.length){
+    const c = $('#graphTaggedArticles');
+    taggedArticles.forEach(a=> c.appendChild(articleRow(a)));
+  }
+  if(corpusRollup && corpusRollup.corpusArticles.length){
+    const c = $('#graphCorpusRollup');
+    corpusRollup.branches.forEach(b=>{
+      const h = document.createElement('div'); h.className='graph-rel-heading'; h.style.marginTop='10px';
+      h.textContent = 'Gałąź: ' + b.child.name;
+      c.appendChild(h);
+      b.articles.forEach(a=> c.appendChild(articleRow(a)));
+    });
+    if(corpusRollup.untaggedArticles.length){
+      const h = document.createElement('div'); h.className='graph-rel-heading'; h.style.marginTop='10px';
+      h.textContent = 'Bez dalszego tagowania pojęciami';
+      c.appendChild(h);
+      corpusRollup.untaggedArticles.forEach(a=> c.appendChild(articleRow(a)));
+    }
+  }
   if(graphHistory.length){ $('#graphBackBtn').onclick = focusBack; }
   wrap.querySelectorAll('[data-focus]').forEach(el=>{
     el.onclick = ()=>{ const [t,i] = el.dataset.focus.split(':'); focusNode(t, i); };
