@@ -142,6 +142,64 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 .pl-thumb-placeholder{width:150px;min-width:150px;aspect-ratio:16/9;border-radius:5px;background:linear-gradient(160deg,var(--surface2),var(--bg));border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;color:var(--gold-dim);font-size:11px;text-align:center;padding:6px;}
 .playlist-embed{margin-top:12px;border-radius:6px;overflow:hidden;border:1px solid var(--line-bright);}
 .playlist-embed iframe{width:100%;aspect-ratio:16/9;display:block;border:0;}
+
+/* nagłówek widoczny WYŁĄCZNIE w wydruku (tytuł/autor/URL artykułu) — patrz @media print niżej */
+.print-only{display:none;}
+
+/* Krok 0: #shell/#content/.module na ekranie są celowo zamknięte w jednym, wewnętrznie
+   przewijanym oknie o wysokości 100vh (żeby #nav/#topbar zostawały na miejscu przy scrollu
+   treści) — bez wyłączenia tego w druku wydruk obcinałby artykuł do tego, co akurat mieściło
+   się w widocznym oknie, zamiast paginować całą treść na tyle stron, ile potrzeba. */
+@media print{
+  html, body{height:auto;background:#fff;}
+  #shell{display:block;height:auto;}
+  #content{display:block;overflow:visible;}
+  #nav, #topbar, .breadcrumb, .art-seal-row, #articleKeywords,
+  #printArticleBtn, #articlePdfLink{display:none!important;}
+  /* Tytuł/autor/kategoria już żyją w #articlePrintHeader (patrz niżej) — te dwa,
+     stylowane pod ekran, muszą zniknąć, inaczej wydruk pokazałby ten sam tytuł i tę samą
+     linię autor/kategoria DWA razy (znalezione dopiero przy realnym renderze próbnego
+     wydruku, nie było oczywiste z samego czytania kodu). */
+  #mod-article #articleTitle, #mod-article #articleMetaLine{display:none!important;}
+  .module{overflow:visible;max-width:none;padding:0;}
+  .module:not(.active){display:none!important;}
+  #mod-article.active{display:block!important;}
+
+  .print-only{display:block;}
+  #articlePrintHeader{margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid #999;font-family:Georgia,'Times New Roman',serif;color:#111;}
+  #articlePrintHeader .pph-title{font-size:16pt;font-weight:700;margin:0 0 4px;}
+  #articlePrintHeader .pph-meta{font-size:10pt;color:#333;margin:0 0 2px;}
+  #articlePrintHeader .pph-url{font-size:9pt;color:#555;word-break:break-all;}
+
+  body, .pagetitle, .pagesub, .art-body, .art-footnotes, .art-biblio, .cite-box{
+    color:#111!important;background:#fff!important;
+  }
+  .pagetitle{font-family:Georgia,'Times New Roman',serif;font-size:20pt;}
+  .pagesub{font-family:Georgia,'Times New Roman',serif;font-size:11pt;}
+  .art-body{font-family:Georgia,'Times New Roman',serif;font-size:12pt;line-height:1.6;}
+  /* kursywa i cytat blokowy muszą zostać rozróżnialne na papierze — na ekranie odróżnia je też
+     kolor (var(--muted)/var(--gold)), które w druku znikają (wymuszony czarny tekst wyżej), więc
+     odróżnienie musi zostać przeniesione na coś, co przetrwa druk czarno-biały: obramowanie +
+     wcięcie + delikatne tło (nie kolor tekstu). */
+  .art-body em{font-style:italic;}
+  .art-body blockquote{border-left:3px solid #111;padding-left:14px;margin:0 0 1em;background:#f2f2f2;color:#111!important;font-style:italic;}
+  .art-footnotes, .art-biblio{font-size:10pt;}
+  .art-footnotes h3, .art-biblio h3{color:#111!important;font-family:Georgia,'Times New Roman',serif;}
+  .cite-box{background:#f2f2f2!important;border:1px solid #999;font-size:9pt;}
+
+  a{color:#111;text-decoration:underline;}
+
+  /* Marginesy i numeracja stron — @page z blokami marginesowymi (@bottom-center) to
+     standardowe CSS Paged Media, ale Chrome go dziś nie renderuje (tylko silniki typu
+     Prince/WeasyPrint) — zostaje jako no-op tam, więc nieszkodliwe zostawić. Numer strony w
+     Chrome/Firefox pochodzi z natywnej opcji drukarki "Nagłówki i stopki" w oknie
+     podglądu wydruku, włączonej domyślnie — to ta sama, oczekiwana ścieżka co przy
+     drukowaniu każdej innej strony WWW, nie coś, co CSS strony musi symulować samodzielnie. */
+  @page{
+    margin: 2cm;
+    @bottom-center{ content: counter(page) " / " counter(pages); font-size: 9pt; color: #555; }
+  }
+}
 </style>
 </head>
 <body>
@@ -243,12 +301,16 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 
     <!-- ARTYKUŁ -->
     <div class="module" id="mod-article">
+      <div id="articlePrintHeader" class="print-only"></div>
       <div class="breadcrumb" id="articleBreadcrumb"></div>
       <div class="art-seal-row"><img id="articleSeal" class="art-seal" alt="Pieczęć AWA"><div class="sygnatura" id="articleSygnatura"></div></div>
       <h1 class="pagetitle" id="articleTitle"></h1>
       <p class="pagesub" id="articleMetaLine"></p>
       <div id="articleKeywords" style="margin-bottom:16px;"></div>
-      <div id="articlePdfLink" style="margin-bottom:16px;"></div>
+      <div style="margin-bottom:16px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="printArticleBtn" type="button">Pobierz jako PDF</button>
+        <div id="articlePdfLink"></div>
+      </div>
       <div class="art-body" id="articleBody"></div>
       <div class="art-footnotes" id="articleFootnotes"></div>
       <div class="art-biblio" id="articleBiblio"></div>
@@ -818,7 +880,21 @@ function openArticle(id, skipPush){
   $('#articleFootnotes').innerHTML = a.footnotesHtml ? `<h3>Przypisy</h3>${a.footnotesHtml}` : '';
   $('#articleBiblio').innerHTML = a.biblioHtml ? `<h3>Bibliografia</h3>${a.biblioHtml}` : '';
   $('#articleCite').textContent = 'Jak cytować: ' + citeArticle(a);
+
+  // Widoczne wyłącznie w @media print (patrz .print-only) — tytuł/autor/URL, żeby ktoś
+  // mający sam wydruk/PDF wiedział skąd pochodzi i mógł wrócić do źródła w przeglądarce.
+  const corpus = a.corpusId ? CONCEPTS.find(c=>c.id===a.corpusId) : null;
+  const printMetaParts = [a.author, a.category, corpus ? 'Korpus: '+corpus.name : null].filter(Boolean);
+  $('#articlePrintHeader').innerHTML = `
+    <div class="pph-title">${escapeHtml(a.title)}</div>
+    ${printMetaParts.length ? `<div class="pph-meta">${escapeHtml(printMetaParts.join(' · '))}</div>` : ''}
+    <div class="pph-url">${escapeHtml(articleDeepLinkUrl(a.id))}</div>
+  `;
 }
+function articleDeepLinkUrl(id){
+  return `${location.origin}${location.pathname}?article=${encodeURIComponent(id)}`;
+}
+$('#printArticleBtn').addEventListener('click', ()=> window.print());
 function citeArticle(a){
   const pieces = [];
   if(a.author) pieces.push(a.author);
