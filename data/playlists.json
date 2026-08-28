@@ -1,1 +1,28 @@
-{"playlists":[]}
+{
+  "playlists": [
+    {
+      "id": "pl_mysterium-iniquitatis-studium_mt4b1pvw",
+      "title": "MYSTERIUM INIQUITATIS STUDIUM",
+      "description": "",
+      "url": "https://www.youtube.com/watch?v=NC01F6N5xhA&list=PLeKNkq2fubis",
+      "thumbBase64": null,
+      "addedAt": "2026-08-22T11:38:38.540Z"
+    },
+    {
+      "id": "pl_trivium_mt4beyk2",
+      "title": "TRIVIUM",
+      "description": "",
+      "url": "https://www.youtube.com/watch?v=ym3pH2pk9XU&list=PLbRBUjY0ALsk",
+      "thumbBase64": null,
+      "addedAt": "2026-08-22T11:48:56.306Z"
+    },
+    {
+      "id": "pl_studium-subwersji-katolicyzmu_mt4bi4c2",
+      "title": "STUDIUM SUBWERSJI KATOLICYZMU",
+      "description": "",
+      "url": "https://www.youtube.com/watch?v=Q15DjDai0KU&list=PLKNc3FD67dgU",
+      "thumbBase64": null,
+      "addedAt": "2026-08-22T11:51:23.762Z"
+    }
+  ]
+}

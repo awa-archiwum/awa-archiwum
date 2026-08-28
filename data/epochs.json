@@ -1,0 +1,130 @@
+{
+  "epochs": [
+    {
+      "id": "epoch_przed-potopem_mt4puwd2",
+      "name": "PRZED POTOPEM",
+      "startApprox": "4000 r. p.n.e.",
+      "endApprox": "2345 r. p.n.e.",
+      "order": 0
+    },
+    {
+      "id": "epoch_patriarchowie_mt4pyjnh",
+      "name": "PATRIARCHOWIE",
+      "startApprox": "2345 r. p. n. e.",
+      "endApprox": "1700 p.n.e.",
+      "order": 1
+    },
+    {
+      "id": "epoch_egipt-i-exodus_mt4pzr19",
+      "name": "EGIPT I EXODUS",
+      "startApprox": "1700 r.p.n.e.",
+      "endApprox": "1200 p.n.e.",
+      "order": 2
+    },
+    {
+      "id": "epoch_sdziowie_mt4q0mb1",
+      "name": "SĘDZIOWIE",
+      "startApprox": "1200 p.n.e.",
+      "endApprox": "1050 p.n.e.",
+      "order": 3
+    },
+    {
+      "id": "epoch_zjednoczone-krlestwo_mt4q25v1",
+      "name": "ZJEDNOCZONE KRÓLESTWO",
+      "startApprox": "1050 p.n.e.",
+      "endApprox": "930 p.n.e.",
+      "order": 4
+    },
+    {
+      "id": "epoch_izrael-i-juda_mt4q36wl",
+      "name": "IZRAEL I JUDA",
+      "startApprox": "930 p.n.e.",
+      "endApprox": "586 p.n.e.",
+      "order": 5
+    },
+    {
+      "id": "epoch_wygnanie-i-okres-perski_mt4q4jot",
+      "name": "WYGNANIE I OKRES PERSKI",
+      "startApprox": "586 p..n.e.",
+      "endApprox": "330 p.n.e.",
+      "order": 6
+    },
+    {
+      "id": "epoch_okres-hellenistyczny_mt4q5lf1",
+      "name": "OKRES HELLENISTYCZNY",
+      "startApprox": "330 p.n.e.",
+      "endApprox": "63 p.n.e.",
+      "order": 7
+    },
+    {
+      "id": "epoch_okres-rzymski_mt4q6ozp",
+      "name": "OKRES RZYMSKI",
+      "startApprox": "63 p.n.e.",
+      "endApprox": "4 p.n.e.",
+      "order": 8
+    },
+    {
+      "id": "epoch_narodzenie-chrystusa_mt4q7l4s",
+      "name": "NARODZENIE CHRYSTUSA",
+      "startApprox": "6 p.n. e.",
+      "endApprox": "4. p.n.e.",
+      "order": 9
+    },
+    {
+      "id": "epoch_ycie-chrystusa_mt4qr5y3",
+      "name": "ŻYCIE CHRYSTUSA",
+      "startApprox": "4 p.n.e.",
+      "endApprox": "33 n.e.",
+      "order": 10
+    },
+    {
+      "id": "epoch_era-apostolska_mt4qs1hf",
+      "name": "ERA APOSTOLSKA",
+      "startApprox": "33 n.e.",
+      "endApprox": "100 n.e.",
+      "order": 11
+    },
+    {
+      "id": "epoch_wczesne-chrzecijastwo_mt4qt1ub",
+      "name": "WCZESNE CHRZEŚCIJAŃSTWO",
+      "startApprox": "100 n.e.",
+      "endApprox": "313 n.e.",
+      "order": 12
+    },
+    {
+      "id": "epoch_wite-cesarstwo-rzymskie_mt4qv0xf",
+      "name": "ŚWIĘTE CESARSTWO RZYMSKIE",
+      "startApprox": "313 n.e.",
+      "endApprox": "476 n.e.",
+      "order": 13
+    },
+    {
+      "id": "epoch_wczesne-redniowiecze_mt4qvsbu",
+      "name": "WCZESNE ŚREDNIOWIECZE",
+      "startApprox": "476 n.e.",
+      "endApprox": "1000 n.e.",
+      "order": 14
+    },
+    {
+      "id": "epoch_redniowiecze_mt4qxcyz",
+      "name": "ŚREDNIOWIECZE",
+      "startApprox": "1000 n.e.",
+      "endApprox": "1492 n.e.",
+      "order": 15
+    },
+    {
+      "id": "epoch_reformacja-i-nowoytno_mt4qygje",
+      "name": "REFORMACJA I NOWOŻYTNOŚĆ",
+      "startApprox": "1450 n.e.",
+      "endApprox": "1789 n.e.",
+      "order": 16
+    },
+    {
+      "id": "epoch_epoka-nowoczesna_mt4qzpwq",
+      "name": "EPOKA  NOWOCZESNA",
+      "startApprox": "1789 n.e.",
+      "endApprox": "1914 n.e.",
+      "order": 17
+    }
+  ]
+}
