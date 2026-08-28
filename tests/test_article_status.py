@@ -75,6 +75,7 @@ FIXTURE = {
          "toId": "concept_grzech", "label": "mieszana-relacja", "articleIds": ["art_draft", "art_published"]},
     ]},
     "epochs": {"epochs": []},
+    "pages": {"pages": []},
 }
 
 # --- isolated temp site: copy of index.html + fixture data, never the real data/ folder ---

@@ -85,6 +85,7 @@ FIXTURE = {
     "epochs": {"epochs": [
         {"id": "epoch_mi", "name": "Mysterium Iniquitatis", "startApprox": "", "endApprox": "", "order": 0},
     ]},
+    "pages": {"pages": []},
 }
 
 site_dir = HERE / "_test_timeline_site"

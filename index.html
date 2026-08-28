@@ -218,6 +218,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <div class="nav-item" data-mod="sources">Wykaz źródeł</div>
     <div class="nav-item" data-mod="books">Książki</div>
     <div class="nav-item" data-mod="channel">Kanał YT</div>
+    <div id="navPagesDynamic"></div>
   </div>
   <div id="content">
     <div id="topbar">
@@ -316,6 +317,13 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
       <div class="art-biblio" id="articleBiblio"></div>
       <div class="cite-box" id="articleCite"></div>
     </div>
+
+    <!-- STRONA (samoobsługowa, prompt-archiwum-samoobslugowe-strony.md) -->
+    <div class="module" id="mod-page">
+      <div class="breadcrumb" id="pageBreadcrumb"></div>
+      <h1 class="pagetitle" id="pageTitle"></h1>
+      <div class="art-body" id="pageBody"></div>
+    </div>
   </div>
 </div>
 
@@ -376,6 +384,7 @@ let CONCEPTS = [];
 let PERSONS = [];
 let RELATIONS = [];
 let EPOCHS = [];
+let PAGES = [];
 
 async function fetchJson(path, fallback){
   try{
@@ -386,7 +395,7 @@ async function fetchJson(path, fallback){
 }
 
 async function loadAllData(){
-  const [articlesData, booksData, playlistsData, channelData, conceptsData, personsData, relationsData, epochsData] = await Promise.all([
+  const [articlesData, booksData, playlistsData, channelData, conceptsData, personsData, relationsData, epochsData, pagesData] = await Promise.all([
     fetchJson('data/articles.json', {articles:[]}),
     fetchJson('data/books.json', {books:[]}),
     fetchJson('data/playlists.json', {playlists:[]}),
@@ -394,7 +403,8 @@ async function loadAllData(){
     fetchJson('data/concepts.json', {concepts:[]}),
     fetchJson('data/persons.json', {persons:[]}),
     fetchJson('data/relations.json', {relations:[]}),
-    fetchJson('data/epochs.json', {epochs:[]})
+    fetchJson('data/epochs.json', {epochs:[]}),
+    fetchJson('data/pages.json', {pages:[]})
   ]);
   // Filtr publikacji: tylko status==='published' trafia do ARTICLES, więc każde
   // miejsce w tym pliku, które czyta ARTICLES, automatycznie respektuje status bez
@@ -414,6 +424,11 @@ async function loadAllData(){
   PERSONS = personsData.persons||[];
   RELATIONS = relationsData.relations||[];
   EPOCHS = (epochsData.epochs||[]).slice().sort((a,b)=>(a.order??0)-(b.order??0));
+  // Ten sam filtr publikacji co ARTICLES powyżej - tylko status==='published'
+  // trafia tutaj, więc renderPagesNav()/openPage() nie muszą osobno sprawdzać
+  // statusu (patrz komentarz przy ARTICLES). Strony to nowa funkcja (brak
+  // migracji "starych bez pola status" - zawsze mają status od utworzenia).
+  PAGES = (pagesData.pages||[]).filter(p=>p.status==='published').slice().sort((a,b)=>(a.navOrder??0)-(b.navOrder??0));
 }
 
 /* ============================= NAWIGACJA ============================= */
@@ -895,6 +910,40 @@ function articleDeepLinkUrl(id){
   return `${location.origin}${location.pathname}?article=${encodeURIComponent(id)}`;
 }
 $('#printArticleBtn').addEventListener('click', ()=> window.print());
+
+/* ============================= STRONY (samoobsługowe) ============================= */
+function renderPagesNav(){
+  const wrap = $('#navPagesDynamic');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  // PAGES tu jest już przefiltrowane do status==='published' w loadAllData() -
+  // ten sam mechanizm co ARTICLES, więc bez osobnej kontroli statusu tutaj.
+  PAGES.forEach(p=>{
+    const el = document.createElement('div');
+    el.className = 'nav-item';
+    el.dataset.pageSlug = p.slug;
+    el.textContent = p.title;
+    el.onclick = ()=> openPage(p.slug);
+    wrap.appendChild(el);
+  });
+}
+// skipPush: tak samo jak w openArticle() - popstate i wstępne wczytanie
+// ?page=... nie mają duplikować wpisu w historii, który już odzwierciedla URL.
+function openPage(slug, skipPush){
+  const p = PAGES.find(x=>x.slug===slug);
+  if(!p) return;
+  if(!skipPush){
+    const url = new URL(location.href);
+    url.searchParams.set('page', slug);
+    history.pushState({page:slug}, '', url);
+  }
+  document.querySelectorAll('.nav-item').forEach(x=>x.classList.toggle('active', x.dataset.pageSlug===slug));
+  document.querySelectorAll('.module').forEach(m=>m.classList.toggle('active', m.id==='mod-page'));
+  $('#pageBreadcrumb').innerHTML = `<span data-nav="start">Start</span>`;
+  $('#pageBreadcrumb').querySelector('[data-nav]').onclick = ()=> switchModule('start');
+  $('#pageTitle').textContent = p.title;
+  $('#pageBody').innerHTML = p.bodyHtml || '';
+}
 function citeArticle(a){
   const pieces = [];
   if(a.author) pieces.push(a.author);
@@ -991,13 +1040,18 @@ function renderPlaylists(){
 // the dashboard — RSS <link> values point at exactly this URL shape
 // (SITE_URL + '?article=' + id, see the admin panel's articleFeedLink()).
 loadAllData().then(()=>{
+  renderPagesNav();
   const articleId = new URLSearchParams(location.search).get('article');
+  const pageSlug = new URLSearchParams(location.search).get('page');
   if(articleId && ARTICLES.some(a=>a.id===articleId)) openArticle(articleId, true);
+  else if(pageSlug && PAGES.some(p=>p.slug===pageSlug)) openPage(pageSlug, true);
   else renderStart();
 });
 window.addEventListener('popstate', ()=>{
   const articleId = new URLSearchParams(location.search).get('article');
+  const pageSlug = new URLSearchParams(location.search).get('page');
   if(articleId && ARTICLES.some(a=>a.id===articleId)) openArticle(articleId, true);
+  else if(pageSlug && PAGES.some(p=>p.slug===pageSlug)) openPage(pageSlug, true);
   else switchModule('start');
 });
 </script>

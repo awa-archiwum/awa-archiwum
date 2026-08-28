@@ -73,6 +73,7 @@ FIXTURE = {
     "persons": {"persons": []},
     "relations": {"relations": []},
     "epochs": {"epochs": []},
+    "pages": {"pages": []},
 }
 
 site_dir = HERE / "_test_corpus_site"

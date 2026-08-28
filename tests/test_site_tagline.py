@@ -53,6 +53,7 @@ BASE_FIXTURE = {
     "persons": {"persons": []},
     "relations": {"relations": []},
     "epochs": {"epochs": []},
+    "pages": {"pages": []},
 }
 
 
