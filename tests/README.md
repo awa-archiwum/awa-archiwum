@@ -15,6 +15,7 @@ playwright install chromium
 ```
 python tests/test_article_status.py
 python tests/test_article_deeplink.py
+python tests/test_content_palette.py
 ```
 
 Kod wyjścia 0 = sukces, 1 = błąd (z opisem asercji).
@@ -75,3 +76,26 @@ modułu w nawigacji czyści nieaktualny parametr, żeby URL nie kłamał o tym,
 co jest pokazane; przycisk "Wstecz" przeglądarki (`popstate`) poprawnie
 otwiera artykuł, do którego URL-a wraca — nie tylko zmienia pasek adresu
 bez odświeżenia widoku.
+
+## `test_content_palette.py`
+
+Pilnuje marmurowej, jasnej palety obszaru treści artykułu
+(`prompt-archiwum-marmurowa-paleta-tresci.md`) — `.art-body`
+(`#articleBody` i `#pageBody`) dostaje własne, stałe zmienne CSS
+(`--content-bg/-ink/-muted/-line`, zdefiniowane raz na gołym `:root`, nie w
+`:root[data-theme="light"]`), niezależne od globalnego przełącznika
+jasny/ciemny — ten sam pomysł co panel czytania książki w AWA Czytnik, który
+też nie podąża za motywem powłoki aplikacji.
+
+Sprawdza obie strony tego twierdzenia, nie tylko "zostaje bez zmian":
+tło/kolor tekstu/kolor nagłówka/obramowanie i kolor cytatu blokowego/kolor
+`<sup>` w `.art-body` są **identyczne** przed i po kliknięciu przełącznika
+motywu, podczas gdy tło `#nav` **faktycznie się zmienia** w tym samym
+momencie (dowód, że przełącznik nie przestał działać w ogóle, tylko że
+marmur jest świadomym wyjątkiem). Sprawdza też kontrast (WCAG AA, 4,5:1)
+tekstu/nagłówków/cytatu względem WŁASNEGO tła `.art-body`, nie tła
+`document.body` (błąd, który realnie złapał odpowiednik tego testu w panelu
+admina — `awa-archiwum/tests/test_theme_light_and_contrast.py` — patrz
+komentarz przy `measure_contrasts()` tam), oraz że drugi kontener
+współdzielący klasę `.art-body` (`#pageBody`, samoobsługowe Strony) dostaje
+dokładnie tę samą paletę.
