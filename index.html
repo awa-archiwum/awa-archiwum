@@ -34,19 +34,32 @@
   --ink:#2b2013; --muted:#6b5f45; --wine:#7a2b21; --wine-bright:#9c3a28;
   --nav-grad-1:#f8f0dc; --nav-grad-2:#ece0c2;
 }
-/* Paleta obszaru czytania artykułu (prompt-archiwum-marmurowa-paleta-tresci.md, wartości
-   poprawione w prompt-archiwum-biala-paleta-tresci.md — pierwsza, marmurowa próba nie trafiła
-   estetycznie; ARCHITEKTURA poniżej zostaje identyczna, zmieniły się tylko wartości kolorów).
-   Klasyczny układ drukowanej książki: niemal biały papier, klasyczna czerń druku — nie surowe
-   #fff/#000, żeby nie razić na podświetlanym ekranie, ale wyraźnie "biała strona/czarny druk",
-   nie kremowo/marmurowo jak poprzednio. Świadomie NA BARE :root, nie w
-   :root[data-theme="light"] powyżej — to ma być STAŁY wygląd samego bloku treści (.art-body),
-   niezależny od globalnego przełącznika jasny/ciemny, tak jak panel czytania książki w AWA
-   Czytnik nie podąża za motywem powłoki aplikacji. Kontrast zweryfikowany (WCAG): ink na bg
-   16.7:1, muted na bg 6.4:1, line (obramowanie cytatu, nie tekst — próg UI-component 3:1, nie
-   tekstowy 4.5:1) na bg 3.22:1. */
+/* Paleta obszaru czytania artykułu — prompt-archiwum-marmurowa-paleta-tresci.md, wartości
+   poprawione w prompt-archiwum-biala-paleta-tresci.md — pierwsza, marmurowa próba (płaski
+   kolor udający marmur) nie trafiła estetycznie; potem klasyczny układ drukowanej książki.
+   Teraz prompt-archiwum-fotorealistyczny-marmur.md: prawdziwe zdjęcie tekstury zamiast
+   koloru — inny mechanizm niż pierwsza próba, nie jej powtórka: czytelność rozwiązuje
+   półprzezroczysta biała warstwa MIĘDZY teksturą a tekstem, nie sama wartość koloru tekstury.
+   ARCHITEKTURA bez zmian: świadomie NA BARE :root, nie w :root[data-theme="light"] powyżej —
+   to ma być STAŁY wygląd samego bloku treści (.art-body), niezależny od globalnego
+   przełącznika jasny/ciemny, tak jak panel czytania książki w AWA Czytnik nie podąża za
+   motywem powłoki aplikacji. --content-ink/--content-muted/--content-line niezmienione,
+   kontrast wobec nich zweryfikowany wcześniej (ink 16.7:1, muted 6.4:1, line 3.22:1) —
+   obraz jest POD tekstem przez półprzezroczystą warstwę, nie zamiast niej.
+   Krok 0 tej tury: rzeczywiste artykuły (5 sztuk, 9–30 tys. znaków, do ~160 akapitów) dają
+   szacunkowo 6000–11000px wysokości .art-body — znacząco więcej niż 4535px obrazu
+   źródłowego, więc `cover`+`no-repeat` rozciągałoby jedną teksturę na całą tę wysokość
+   (powiększenie nawet ~2-3x dla najdłuższych artykułów — widocznie miękkie przy źródle
+   fotograficznym, przeciwnie do celu "fotorealistyczna"). Wybrano `repeat-y` +
+   `background-size:100% auto` — stała, dobra rozdzielczość niezależnie od długości
+   artykułu, kosztem możliwego widocznego szwu między powtórzeniami (nie jest to bezszwowa
+   tekstura) — mniejsze zło niż postępująca utrata ostrości. Plik: oryginał 2268×4535/~921KB
+   przycięty do 1400×2799 (z zapasem ponad realną szerokość .art-body nawet przy 2x retina),
+   JPEG quality=85 (bez WebP — brak precedensu w projekcie) — finalne ~415KB, zweryfikowane
+   wizualnie jako wciąż ostre i fotorealistyczne. */
 :root{
-  --content-bg:#fafafa; --content-ink:#1a1a1a; --content-muted:#5c5c5c; --content-line:#8c8c8c;
+  --content-bg: linear-gradient(rgba(255,255,255,.55), rgba(255,255,255,.55)), url('assets/content-bg-marble.jpg');
+  --content-ink:#1a1a1a; --content-muted:#5c5c5c; --content-line:#8c8c8c;
 }
 *{box-sizing:border-box;}
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;}
@@ -100,7 +113,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 /* widok artykułu */
 .art-seal-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
 .art-seal{width:30px;height:30px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
-.art-body{font-family:'Fraunces',serif;font-size:15.5px;line-height:1.7;color:var(--content-ink);background:var(--content-bg);border:1px solid var(--content-line);border-radius:8px;padding:22px 26px;}
+.art-body{font-family:'Fraunces',serif;font-size:15.5px;line-height:1.7;color:var(--content-ink);background-image:var(--content-bg);background-size:100% auto;background-position:top center;background-repeat:repeat-y;border:1px solid var(--content-line);border-radius:8px;padding:22px 26px;}
 .art-body blockquote{border-left:3px solid var(--content-line);background:rgba(140,140,140,.08);padding:6px 14px;font-style:italic;color:var(--content-muted);margin:0 0 1em;border-radius:0 4px 4px 0;}
 .art-body sup{color:var(--content-muted);}
 .art-footnotes,.art-biblio{font-size:13px;color:var(--ink);margin-top:20px;}
