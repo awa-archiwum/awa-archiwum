@@ -89,29 +89,12 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 /* hero (strona startowa) */
 .hero{position:relative;border-radius:10px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line-bright);}
 .hero img{width:100%;height:auto;display:block;max-height:360px;object-fit:cover;}
-
-/* prompt-archiwum-swieca-grafika-startowa.md: sprostowanie do poprzedniej tury - efekt
-   swiecy mial trafic tutaj (duza grafika startowa), nie na maly #articleSeal (ten
-   zostaje BEZ ZMIAN, patrz .art-seal-wrap nizej - osobna, nietkniete regula). Ten sam
-   mechanizm, inne proporcje: .hero jest juz position:relative+overflow:hidden (bez
-   potrzeby nowego wrappera jak przy malym emblemacie), gradient wiekszy i szerszy,
-   dopasowany do panoramicznego, nie kolistego ksztaltu tej grafiki. JS steruje osobna
-   zmienna --candle-intensity-hero (nie ta sama co #articleSeal) - patrz createCandleEffect()
-   w skrypcie, dwie NIEZALEZNE instancje tej samej funkcji, zeby oba plomienie migotaly
-   niezaleznie od siebie, nie w idealnej synchronizacji (co zdradzaloby sztucznosc). */
-.hero img{transition:filter 1.2s ease;filter:brightness(.4) saturate(.85);}
-.hero::after{
-  content:'';position:absolute;top:-30%;left:-10%;width:75%;height:160%;
-  background:radial-gradient(circle at 40% 45%, rgba(255,170,80,.9) 0%, rgba(255,170,80,0) 65%);
-  mix-blend-mode:screen;pointer-events:none;
-  opacity:var(--candle-intensity-hero, .55);
-  transition:opacity 150ms ease-out;
-}
-:root[data-theme="light"] .hero img{filter:none;}
-:root[data-theme="light"] .hero::after{opacity:0;}
-@media (prefers-reduced-motion: reduce){
-  .hero img, .hero::after{ transition:none; }
-}
+/* prompt-archiwum-statyczna-grafika-nocna.md: rezygnacja z animacji swiecy na TYM
+   elemencie (byla w prompt-archiwum-swieca-grafika-startowa.md - user ocenil jako
+   "pulsujacy filtr kolorystyczny", nie prawdziwe swiatlo) na rzecz podmiany calego
+   pliku na osobno przygotowana, nocna wersje grafiki (assets/hero-dark.jpg) - patrz
+   updateHeroImage() w skrypcie. #articleSeal/sealCandle NIETKNIETE, zostaja z
+   animacja jak dotad - to zadanie dotyczy wylacznie .hero. */
 
 /* archiwalne elementy */
 .sygnatura{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold-dim);letter-spacing:.05em;}
@@ -414,8 +397,19 @@ const $ = s => document.querySelector(s);
 
 const SEAL_IMG = 'assets/seal.jpg';
 const HERO_IMG = 'assets/hero.jpg';
+// prompt-archiwum-statyczna-grafika-nocna.md: statyczna podmiana calego pliku wg motywu,
+// zamiast animacji CSS/JS (heroCandle) uzytej w poprzedniej turze - user ocenil ja jako
+// "pulsujacy filtr kolorystyczny", nie prawdziwe swiatlo. hero-dark.jpg to osobno
+// wygenerowana graficznie, nocna wersja tej samej kompozycji, nie CSS. Wywolywane z
+// setThemeUI() - ten sam, juz istniejacy listener zmiany motywu, nie nowy/osobny.
+const HERO_IMG_DARK = 'assets/hero-dark.jpg';
 document.querySelectorAll('#navSeal').forEach(el=> el.src = SEAL_IMG);
-const heroImgEl = document.getElementById('heroImg'); if(heroImgEl) heroImgEl.src = HERO_IMG;
+function updateHeroImage(){
+  const heroImgEl = document.getElementById('heroImg');
+  if(!heroImgEl) return;
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  heroImgEl.src = isLight ? HERO_IMG : HERO_IMG_DARK;
+}
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 /* ============================= TRYB JASNY/CIEMNY =============================
@@ -439,6 +433,7 @@ function setThemeUI(theme){
     btn.title = 'Przełącz na tryb jasny';
   }
   updateCandleEffect();
+  updateHeroImage();
 }
 $('#themeToggleBtn').onclick = ()=>{
   const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
@@ -446,8 +441,16 @@ $('#themeToggleBtn').onclick = ()=>{
   try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
 };
 
-/* ============================= ŚWIECA (prompt-archiwum-swieca-emblemat.md, rozszerzone w
-   prompt-archiwum-swieca-grafika-startowa.md o drugie miejsce) =============================
+/* ============================= ŚWIECA NAD EMBLEMATEM (prompt-archiwum-swieca-emblemat.md)
+   ============================= Krotka historia: prompt-archiwum-swieca-grafika-startowa.md
+   rozszerzyl to na druga instancje (heroCandle) dla duzej grafiki startowej .hero, ale
+   prompt-archiwum-statyczna-grafika-nocna.md cofnal to konkretne uzycie - user ocenil
+   animowany efekt na DUZEJ grafice jako "pulsujacy filtr kolorystyczny", nie prawdziwe
+   swiatlo, i wybral statyczna podmiane pliku (patrz updateHeroImage() wyzej) zamiast
+   animacji tam. createCandleEffect() zostaje jako funkcja (wciaz uzywana przez maly
+   #articleSeal, ktorego ta poprawka nie dotyczy) - usunieta zostala tylko DRUGA
+   INSTANCJA (heroCandle), nie sam mechanizm.
+
    JS, nie CSS @keyframes — @keyframes ma jeden, ustalony okres, który przy dłuższym patrzeniu
    staje się rozpoznawalny i psuje wrażenie realizmu; tu KAŻDY kolejny odstęp (80–200ms) i
    KAŻDA kolejna wartość jasności są losowane od nowa (setTimeout rekurencyjnie, nie
@@ -456,13 +459,7 @@ $('#themeToggleBtn').onclick = ()=>{
    Zatrzymywane całkowicie, gdy karta nie jest widoczna (document.visibilityState) — nie ma
    sensu przeliczać animacji, której nikt nie widzi. prefers-reduced-motion: interwał w ogóle
    nie startuje, zmienna ustawiana raz na stałą wartość (statyczny, ciepły blask bez ruchu —
-   patrz też transition:none w CSS pod tym samym media query).
-
-   createCandleEffect(cssVarName) — JEDNA implementacja, wołana DWA RAZY (mały #articleSeal,
-   duża grafika startowa .hero) z osobną nazwą zmiennej CSS dla każdej — nie kopia kodu pod
-   inną nazwą zmiennych, tylko dwie niezależne instancje tej samej funkcji. Osobne timery i
-   osobne losowanie per instancja są celowe: dwa płomienie migoczące w idealnej synchronizacji
-   zdradzałyby sztuczność efektu równie mocno, jak zauważalny okres @keyframes. */
+   patrz też transition:none w CSS pod tym samym media query). */
 const CANDLE_MIN_INTENSITY = 0.35, CANDLE_MAX_INTENSITY = 0.75;
 const CANDLE_MIN_INTERVAL_MS = 80, CANDLE_MAX_INTERVAL_MS = 200;
 const CANDLE_GUST_CHANCE = 0.03; // przy śr. ~140ms/tick to statystycznie raz na kilka-kilkanaście sekund
@@ -500,12 +497,11 @@ function createCandleEffect(cssVarName){
 }
 
 const sealCandle = createCandleEffect('--candle-intensity');
-const heroCandle = createCandleEffect('--candle-intensity-hero');
-function updateCandleEffect(){ sealCandle.update(); heroCandle.update(); }
+function updateCandleEffect(){ sealCandle.update(); }
 
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible'){ updateCandleEffect(); }
-  else{ sealCandle.stop(); heroCandle.stop(); }
+  else{ sealCandle.stop(); }
 });
 if(window.matchMedia){
   window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', updateCandleEffect);
