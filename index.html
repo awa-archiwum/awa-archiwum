@@ -113,6 +113,37 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 /* widok artykułu */
 .art-seal-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
 .art-seal{width:30px;height:30px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
+
+/* prompt-archiwum-swieca-emblemat.md: emblemat w trybie ciemnym wyglada jak oswietlony
+   wylacznie migoczacym plomieniem swiecy. Domyslnie (tryb ciemny, brak data-theme) WLACZONY -
+   ten sam wzorzec co reszta palety w tym pliku (rola zdefiniowana na golym :root/selektorach,
+   :root[data-theme="light"] tylko wylacza). Migotanie sterowane z JS przez --candle-intensity
+   (celowo NIE @keyframes - te zdradzaja powtarzalny okres przy dluzszym patrzeniu, patrz
+   komentarz przy JS nizej) - tu tylko odczytane jako opacity z transition, zeby kolejne
+   losowe wartosci nie skakaly klatka-po-klatce. Kolor sam w gradiencie NIE jest zmienna
+   (przegladarki nie animuja plynnie zmiany koloru wewnatrz gradientu przez transition na
+   "background" - dziala niezawodnie tylko transition na samym opacity), stad --candle-intensity
+   steruje jasnoscia calej warstwy, nie odcieniem.
+   Asymetryczne polozenie (top/left przesuniete, nie 50/50) - jakby swieca stala z boku, nie
+   idealnie na wprost emblematu. */
+.art-seal-wrap{position:relative;display:inline-block;line-height:0;}
+.art-seal-wrap .art-seal{transition:filter 1.2s ease;filter:brightness(.4) saturate(.85);}
+.art-seal-wrap::after{
+  content:'';position:absolute;top:-25%;left:30%;width:170%;height:170%;border-radius:50%;
+  background:radial-gradient(circle at 35% 40%, rgba(255,170,80,.9) 0%, rgba(255,170,80,0) 65%);
+  mix-blend-mode:screen;pointer-events:none;
+  opacity:var(--candle-intensity, .55);
+  transition:opacity 150ms ease-out;
+}
+/* Tryb jasny: swiatlo dzienne, brak swiecy. */
+:root[data-theme="light"] .art-seal-wrap .art-seal{filter:none;}
+:root[data-theme="light"] .art-seal-wrap::after{opacity:0;}
+/* prefers-reduced-motion: JS (nizej) w ogole nie startuje interwalu migotania i ustawia
+   --candle-intensity raz na stala wartosc - tu dodatkowo wylaczone same transition, zeby
+   nawet jednorazowe przejscie "zgaszenia swiatla" przy przelaczeniu motywu nie bylo ruchem. */
+@media (prefers-reduced-motion: reduce){
+  .art-seal-wrap .art-seal, .art-seal-wrap::after{ transition:none; }
+}
 .art-body{font-family:'Fraunces',serif;font-size:15.5px;line-height:1.7;color:var(--content-ink);background-image:var(--content-bg);background-size:100% auto;background-position:top center;background-repeat:repeat-y;border:1px solid var(--content-line);border-radius:8px;padding:22px 26px;}
 .art-body img{max-width:100%;height:auto;display:block;margin:14px auto;border-radius:4px;}
 .art-body blockquote{border-left:3px solid var(--content-line);background:rgba(140,140,140,.08);padding:6px 14px;font-style:italic;color:var(--content-muted);margin:0 0 1em;border-radius:0 4px 4px 0;}
@@ -332,7 +363,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <div class="module" id="mod-article">
       <div id="articlePrintHeader" class="print-only"></div>
       <div class="breadcrumb" id="articleBreadcrumb"></div>
-      <div class="art-seal-row"><img id="articleSeal" class="art-seal" alt="Pieczęć AWA"><div class="sygnatura" id="articleSygnatura"></div></div>
+      <div class="art-seal-row"><span class="art-seal-wrap"><img id="articleSeal" class="art-seal" alt="Pieczęć AWA"></span><div class="sygnatura" id="articleSygnatura"></div></div>
       <h1 class="pagetitle" id="articleTitle"></h1>
       <p class="pagesub" id="articleMetaLine"></p>
       <div id="articleKeywords" style="margin-bottom:16px;"></div>
@@ -384,12 +415,65 @@ function setThemeUI(theme){
     btn.innerHTML = ICON_SUN;
     btn.title = 'Przełącz na tryb jasny';
   }
+  updateCandleEffect();
 }
 $('#themeToggleBtn').onclick = ()=>{
   const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
   setThemeUI(next);
   try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
 };
+
+/* ============================= ŚWIECA NAD EMBLEMATEM (prompt-archiwum-swieca-emblemat.md) =============================
+   JS, nie CSS @keyframes — @keyframes ma jeden, ustalony okres, który przy dłuższym patrzeniu
+   staje się rozpoznawalny i psuje wrażenie realizmu; tu KAŻDY kolejny odstęp (80–200ms) i
+   KAŻDA kolejna wartość jasności są losowane od nowa (setTimeout rekurencyjnie, nie
+   setInterval o stałym okresie), więc nie ma jednego wzorca do wykrycia. Rzadkie (losowe,
+   średnio raz na kilka–kilkanaście sekund) większe przygaszenie imituje podmuch powietrza.
+   Zatrzymywane całkowicie, gdy karta nie jest widoczna (document.visibilityState) — nie ma
+   sensu przeliczać animacji, której nikt nie widzi. prefers-reduced-motion: interwał w ogóle
+   nie startuje, --candle-intensity ustawiane raz na stałą wartość (statyczny, ciepły blask
+   bez ruchu — patrz też transition:none w CSS pod tym samym media query). */
+const CANDLE_MIN_INTENSITY = 0.35, CANDLE_MAX_INTENSITY = 0.75;
+const CANDLE_MIN_INTERVAL_MS = 80, CANDLE_MAX_INTERVAL_MS = 200;
+const CANDLE_GUST_CHANCE = 0.03; // przy śr. ~140ms/tick to statystycznie raz na kilka-kilkanaście sekund
+const CANDLE_GUST_INTENSITY = 0.12;
+const CANDLE_STATIC_INTENSITY = 0.5; // prefers-reduced-motion: jedna, stała wartość
+let candleTimer = null;
+
+function isDarkModeActive(){ return document.documentElement.getAttribute('data-theme') !== 'light'; }
+function prefersReducedMotion(){ return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+
+function scheduleCandleFlicker(){
+  const delay = CANDLE_MIN_INTERVAL_MS + Math.random() * (CANDLE_MAX_INTERVAL_MS - CANDLE_MIN_INTERVAL_MS);
+  candleTimer = setTimeout(()=>{
+    if(document.visibilityState === 'visible' && isDarkModeActive() && !prefersReducedMotion()){
+      const gust = Math.random() < CANDLE_GUST_CHANCE;
+      const intensity = gust ? CANDLE_GUST_INTENSITY
+        : CANDLE_MIN_INTENSITY + Math.random() * (CANDLE_MAX_INTENSITY - CANDLE_MIN_INTENSITY);
+      document.documentElement.style.setProperty('--candle-intensity', intensity.toFixed(2));
+    }
+    scheduleCandleFlicker();
+  }, delay);
+}
+function stopCandleFlicker(){ if(candleTimer){ clearTimeout(candleTimer); candleTimer = null; } }
+
+function updateCandleEffect(){
+  stopCandleFlicker();
+  if(!isDarkModeActive()) return; // tryb jasny — CSS i tak wyłącza warstwę, zmienna nieistotna
+  if(prefersReducedMotion()){
+    document.documentElement.style.setProperty('--candle-intensity', CANDLE_STATIC_INTENSITY);
+    return;
+  }
+  scheduleCandleFlicker();
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState === 'visible'){ updateCandleEffect(); }
+  else{ stopCandleFlicker(); }
+});
+if(window.matchMedia){
+  window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', updateCandleEffect);
+}
+
 setThemeUI(document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark');
 
 /* ============================= DANE — wyłącznie odczyt, wyłącznie z data/*.json =============================
