@@ -88,7 +88,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 
 /* hero (strona startowa) */
 .hero{position:relative;border-radius:10px;overflow:hidden;margin-bottom:14px;border:1px solid var(--line-bright);}
-.hero img{width:100%;height:auto;display:block;max-height:360px;object-fit:cover;}
+.hero img,.hero video{width:100%;height:auto;display:block;max-height:360px;object-fit:cover;}
 /* prompt-archiwum-statyczna-grafika-nocna.md: rezygnacja z animacji swiecy na TYM
    elemencie (byla w prompt-archiwum-swieca-grafika-startowa.md - user ocenil jako
    "pulsujacy filtr kolorystyczny", nie prawdziwe swiatlo) na rzecz podmiany calego
@@ -297,6 +297,17 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
     <div class="module active" id="mod-start">
       <div class="hero">
         <img id="heroImg" alt="Pieczęć Archiwum Wielkiej Apostazji na marmurze">
+        <!-- prompt-archiwum-wideo-swieca-hero.md: tryb ciemny = wideo (prawdziwy, poruszajacy
+             sie plomien), nie kolejny statyczny obraz. Oba elementy zyja w DOM na stale,
+             #updateHeroImage() przelacza WIDOCZNOSC (display), nie .src - prostsze niz
+             podmiana typu elementu, i pozwala <video> zachowac wlasny stan odtwarzania
+             (play/pause) miedzy przelaczeniami motywu. poster= to ten sam hero-dark.jpg
+             z poprzedniej tury (zamiast usuwac plik, ktory i tak juz mial dokladnie
+             wlasciwy, statyczny wyglad tej sceny) - widoczny, zanim wideo zdazy sie
+             zaladowac/zaczac odtwarzac. -->
+        <video id="heroVideo" muted loop autoplay playsinline poster="assets/hero-dark.jpg" style="display:none;">
+          <source src="assets/hero-dark.mp4" type="video/mp4">
+        </video>
       </div>
       <p class="pagesub" id="siteTaglineText" style="margin-top:14px;"></p>
       <div class="card" style="margin-bottom:18px;">
@@ -397,18 +408,36 @@ const $ = s => document.querySelector(s);
 
 const SEAL_IMG = 'assets/seal.jpg';
 const HERO_IMG = 'assets/hero.jpg';
-// prompt-archiwum-statyczna-grafika-nocna.md: statyczna podmiana calego pliku wg motywu,
-// zamiast animacji CSS/JS (heroCandle) uzytej w poprzedniej turze - user ocenil ja jako
-// "pulsujacy filtr kolorystyczny", nie prawdziwe swiatlo. hero-dark.jpg to osobno
-// wygenerowana graficznie, nocna wersja tej samej kompozycji, nie CSS. Wywolywane z
-// setThemeUI() - ten sam, juz istniejacy listener zmiany motywu, nie nowy/osobny.
-const HERO_IMG_DARK = 'assets/hero-dark.jpg';
 document.querySelectorAll('#navSeal').forEach(el=> el.src = SEAL_IMG);
+// Jasna wersja (#heroImg) ustawiana raz - jej .src juz sie nie zmienia z motywem
+// (prompt-archiwum-wideo-swieca-hero.md: tryb ciemny to teraz #heroVideo, OSOBNY
+// element w DOM od poczatku, nie kolejna podmiana .src tego samego <img> jak w
+// poprzedniej turze - hero-dark.jpg zostaje jako poster= tego wideo, patrz HTML).
+const heroImgInit = document.getElementById('heroImg'); if(heroImgInit) heroImgInit.src = HERO_IMG;
+
+// prompt-archiwum-wideo-swieca-hero.md: statyczny hero-dark.jpg (poprzednia tura) zastapiony
+// wygenerowanym wideo z prawdziwym, poruszajacym sie plomieniem (assets/hero-dark.mp4,
+// zapetlone przez xfade - patrz raw/hero-dark-source.mp4 w repo admina, gitignored, do
+// ewentualnego ponownego przetworzenia). #heroImg i #heroVideo zyja w DOM na stale,
+// updateHeroImage() przelacza WIDOCZNOSC (display), nie typ/.src elementu - prostsze, i
+// <video> zachowuje wlasny stan odtwarzania miedzy przelaczeniami. Ta sama funkcja
+// odpowiada tez za pauze/wznowienie wideo wg document.visibilityState (wolana z tego
+// samego listenera co pauza migotania swiecy nizej - ten sam duch: nie liczyc/odtwarzac
+// animacji, ktorej nikt nie widzi), wiec wywolanie przy kazdej zmianie widocznosci karty
+// wystarcza, bez osobnego, drugiego listenera.
 function updateHeroImage(){
   const heroImgEl = document.getElementById('heroImg');
+  const heroVideoEl = document.getElementById('heroVideo');
   if(!heroImgEl) return;
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  heroImgEl.src = isLight ? HERO_IMG : HERO_IMG_DARK;
+  heroImgEl.style.display = isLight ? '' : 'none';
+  if(!heroVideoEl) return;
+  heroVideoEl.style.display = isLight ? 'none' : '';
+  if(isLight || document.visibilityState !== 'visible'){
+    heroVideoEl.pause();
+  }else{
+    heroVideoEl.play().catch(()=>{}); // rzadka blokada autoplay przez przegladarke - cicha porazka, nie blad w konsoli
+  }
 }
 function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -502,6 +531,7 @@ function updateCandleEffect(){ sealCandle.update(); }
 document.addEventListener('visibilitychange', ()=>{
   if(document.visibilityState === 'visible'){ updateCandleEffect(); }
   else{ sealCandle.stop(); }
+  updateHeroImage(); // pauzuje/wznawia #heroVideo wg widocznosci karty - patrz komentarz przy funkcji
 });
 if(window.matchMedia){
   window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', updateCandleEffect);
