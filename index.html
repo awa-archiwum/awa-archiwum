@@ -494,7 +494,10 @@ h1.pagetitle{font-family:'Special Elite',monospace;font-size:24px;margin:0 0 4px
 <script>
 const $ = s => document.querySelector(s);
 
-const SEAL_IMG = 'assets/seal.jpg';
+const SEAL_IMG = 'assets/seal-stamp.jpg'; // prompt-archiwum-emblemat-pieczec.md: Krok 0 potwierdzil
+// dokladnie dwa male wystapienia emblematu w calym pliku (#navSeal, #articleSeal), oba juz
+// zasilane z tej jednej stalej - #heroImg/duza grafika startowa uzywa calkowicie osobnych
+// stalych (HERO_IMG/hero-dark.mp4), nietknietych.
 const HERO_IMG = 'assets/hero.jpg';
 document.querySelectorAll('#navSeal').forEach(el=> el.src = SEAL_IMG);
 // Jasna wersja (#heroImg) ustawiana raz - jej .src juz sie nie zmienia z motywem
