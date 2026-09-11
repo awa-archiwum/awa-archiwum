@@ -214,7 +214,15 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family
 .nav-item.active{opacity:1;border-left-color:var(--gold);background:rgba(201,169,97,.12);font-weight:600;color:var(--gold-bright);}
 #content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
 #topbar{display:flex;align-items:center;gap:14px;padding:10px 22px;border-bottom:1px solid var(--line);background:var(--surface);}
-#topbar h2{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;margin:0;font-weight:600;color:var(--gold-bright);}
+/* prompt-archiwum-naglowek-prosty.md: Krok 0 potwierdzil, ze to (statyczny tekst "Archiwum",
+   powtarzalny naglowek widoku na gorze KAZDEJ podstrony) jest odrebnym elementem od .nav-logo
+   (wordmark w rogu, wyzej) - dwa rozne znaczniki, tylko podobnie brzmiace w rozmowie. .nav-logo
+   zostaje kursywa (marka), #topbar h2 przestawiony na prosty wariant 0,400 (juz zaimportowany,
+   bez nowego importu) - funkcjonalna etykieta orientacyjna, szybka czytelnosc przed
+   ozdobnoscia. font-weight obnizony z 600 do 400, bo prosty (nie kursywny) wariant Cormorant
+   Garamond zaladowany jest tylko w wadze 400 (import ma 0,400;1,400;1,600;1,700) - 600 bez
+   kursywy nie jest wczytane. */
+#topbar h2{font-family:'Cormorant Garamond',serif;font-size:16px;margin:0;font-weight:400;color:var(--gold-bright);}
 .spacer{flex:1;}
 #themeToggleBtn{display:flex;align-items:center;justify-content:center;padding:7px;line-height:0;}
 .module{flex:1;overflow:auto;padding:26px 32px;display:none;max-width:860px;}
