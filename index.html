@@ -311,6 +311,26 @@ h1.pagetitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-weigh
 .art-body img{max-width:100%;height:auto;display:block;margin:14px auto;border-radius:4px;}
 .art-body blockquote{border-left:3px solid var(--content-line);background:rgba(140,140,140,.08);padding:6px 14px;font-style:italic;color:var(--content-muted);margin:0 0 1em;border-radius:0 4px 4px 0;}
 .art-body sup{color:var(--content-muted);}
+/* prompt-archiwum-pieczec-na-artykule.md: Krok 0 — #articleBody.innerHTML jest CALKOWICIE
+   nadpisywane przy kazdym renderze/edycji artykulu (patrz `$('#articleBody').innerHTML = ...`),
+   wiec pieczec NIE MOZE byc dzieckiem .art-body — znikalaby przy kazdym otwarciu/zapisie. Stad
+   .art-body-wrap: nowy, czysto pozycjonujacy kontener (position:relative, brak wlasnego
+   wygladu) opakowujacy .art-body i #articleStamp jako RODZENSTWO, przetrwa kazdy render tresci.
+   .art-stamp: lekko obrocona (-12deg — realne stemple nigdy nie sa proste), mix-blend-mode:
+   multiply (tusz wsiakniety w papier, nie nieprzezroczysta naklejka — bialy margines kwadratu
+   zrodlowego pliku znika w multiply na jasnym tle .art-body, wiec bez potrzeby border-radius
+   przycinania), pointer-events:none (nie blokuje zaznaczania/klikania tekstu pod spodem).
+   Pozycja: top:-20px (lekko zachodzi NAD gorna krawedz .art-body, blisko bloku
+   tytulowego/metadanych nad nim, tak jak realny stempel czesto zachodzi na naglowek/podpis
+   dokumentu) + right:24px. .art-body ma dzis wlasna, niezalezna od motywu palete (marmur/biel
+   na BARE :root, nie w [data-theme="light"]) — wiec pieczec automatycznie wyglada identycznie w
+   obu motywach, bez zadnego dodatkowego kodu zaleznego od tematu (zweryfikowane bezposrednio).
+   Warunek wyswietlania: w archiwum-public ARTICLES jest JUZ przefiltrowane do
+   status==='published' (patrz loadAllData() — draft nigdy tu nie dociera), wiec pieczec
+   pokazuje sie zawsze, bez dodatkowej logiki JS - w panelu admina (gdzie draft REALNIE
+   istnieje) jest osobny warunek, patrz setupArticleBodyEditor(). */
+.art-body-wrap{position:relative;}
+.art-stamp{position:absolute;top:-20px;right:24px;width:120px;height:120px;transform:rotate(-12deg);opacity:.8;mix-blend-mode:multiply;pointer-events:none;z-index:2;}
 .art-footnotes,.art-biblio{font-size:13px;color:var(--ink);margin-top:20px;}
 .art-footnotes h3,.art-biblio h3{font-family:'Fraunces',serif;font-size:15px;color:var(--gold-bright);}
 .cite-box{background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:20px;color:var(--muted);}
@@ -545,7 +565,10 @@ h1.pagetitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-weigh
         <button class="btn" id="printArticleBtn" type="button">Pobierz jako PDF</button>
         <div id="articlePdfLink"></div>
       </div>
-      <div class="art-body" id="articleBody"></div>
+      <div class="art-body-wrap">
+        <div class="art-body" id="articleBody"></div>
+        <img class="art-stamp" id="articleStamp" src="assets/seal-stamp.jpg" alt="" aria-hidden="true">
+      </div>
       <div class="art-footnotes" id="articleFootnotes"></div>
       <div class="art-biblio" id="articleBiblio"></div>
       <div class="cite-box" id="articleCite"></div>
