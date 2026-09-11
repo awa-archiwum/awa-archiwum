@@ -89,12 +89,37 @@
    dedykowana --nav-logo-color (wartość #e6c988 w bare :root wyżej = ta sama co --gold-bright
    ciemnego motywu, więc tryb ciemny wygląda dokładnie jak przedtem) zastosowana WYŁĄCZNIE do
    .nav-logo. Tu, w trybie jasnym: #1a1a1a — ta sama czerń co --ink (11.38:1 na --bg, ten sam
-   wynik co dla --ink, bo to dosłownie ta sama wartość). */
+   wynik co dla --ink, bo to dosłownie ta sama wartość).
+
+   prompt-archiwum-monochromatyczny-tryb-dzienny.md: błękit → tony szarości/papieru, pod nową
+   grafikę startową w stylu stalorytu (assets/hero-light-engraving.jpg, patrz HERO_IMG wyżej).
+   Krok 0: --bg/--surface/--surface2/--line/--nav-grad-* to ogólne tło/karty/nawigacja (to się
+   zmienia); --gold/--gold-bright/--gold-dim/--wine/--wine-bright to już wcześniej wyodrębnione
+   kolorowe akcenty (sygnatura, hover, nagłówki) — użytkownik świadomie odkłada decyzję o nich,
+   NIETKNIęTE tą turą. --line-bright NIE jest nazwanym akcentem (to zwykłe, neutralne
+   obramowanie UI, tylko przypadkiem dostrojone do błękitu w poprzedniej turze) — policzone
+   razem z resztą tła.
+   Metoda: każda zmienna przeliczona z HSL na to samo H (~40°, ciepławy "papier") i to samo S
+   (0.05, ledwie wyczuwalne — celowo NIE tak ciepłe jak odrzucony wcześniej beż/ecru, to ma
+   czytać się jako monochromatyczny stalorut, nie kolor), zachowując dokładnie oryginalne L
+   (jasność) błękitu — struktura relacji jaśniejszy/ciemniejszy między zmiennymi nietknięta,
+   zmienia się tylko odcień:
+     --bg (L=.776) --surface (L=.961, najjaśniejsza — "kartka") --surface2/--nav-grad-2 (L=.875)
+     --line (L=.824) --line-bright (L=.359, wyraźnie najciemniejsza) --nav-grad-1 (L=.975)
+   --ink (czerń) NIE zmieniony — 10.43:1 na nowym --bg, z zapasem. --muted też NIE zmieniony —
+   4.65:1 na nowym --bg, wciąż nad progiem 4.5:1 AA (spadło z 5.07:1 na błękicie, ale wciąż
+   przechodzi, więc bez potrzeby retuszu).
+   Akcenty (nietknięte, jak zastrzeżono) przeliczone tylko dla SPRAWDZENIA, nie zmiany: na nowym
+   --bg --gold-bright daje 4.31:1 (spadek z 4.70:1 na błękicie, PONIŻEJ 4.5:1 AA) i --wine-bright
+   4.13:1 (spadek z 4.50:1, też poniżej) — oba wciąż czytelne wizualnie, ale formalnie pod
+   progiem AA na nowym tle; --gold-dim 4.87:1 i --gold jako obramowanie 3.56:1 nadal przechodzą.
+   Zgłoszone użytkownikowi wprost (patrz podsumowanie tury) zamiast cichej korekty — to
+   świadomie odłożona decyzja, nie przeoczenie. */
 :root[data-theme="light"]{
-  --bg:#aad9e2; --surface:#f1f8f9; --surface2:#cfebef; --line:#bee0e6; --line-bright:#3e6d79;
+  --bg:#c9c7c3; --surface:#f6f5f5; --surface2:#e1e0de; --line:#d4d3d0; --line-bright:#605d57;
   --gold:#7d5f28; --gold-bright:#6e5320; --gold-dim:#634c22;
   --ink:#1a1a1a; --muted:#5c5140; --wine:#7a2b21; --wine-bright:#9c3a28;
-  --nav-grad-1:#f6fafb; --nav-grad-2:#cfebef; --nav-logo-color:#1a1a1a;
+  --nav-grad-1:#f9f9f8; --nav-grad-2:#e1e0de; --nav-logo-color:#1a1a1a;
 }
 /* Paleta obszaru czytania artykułu — prompt-archiwum-marmurowa-paleta-tresci.md, wartości
    poprawione w prompt-archiwum-biala-paleta-tresci.md — pierwsza, marmurowa próba (płaski
@@ -498,7 +523,10 @@ const SEAL_IMG = 'assets/seal-stamp.jpg'; // prompt-archiwum-emblemat-pieczec.md
 // dokladnie dwa male wystapienia emblematu w calym pliku (#navSeal, #articleSeal), oba juz
 // zasilane z tej jednej stalej - #heroImg/duza grafika startowa uzywa calkowicie osobnych
 // stalych (HERO_IMG/hero-dark.mp4), nietknietych.
-const HERO_IMG = 'assets/hero.jpg';
+const HERO_IMG = 'assets/hero-light-engraving.jpg'; // prompt-archiwum-monochromatyczny-tryb-dzienny.md:
+// stary assets/hero.jpg zastapiony grafika w stylu stalorytu/grawiury, spojna z nowa,
+// monochromatyczna paleta powloki. Tryb ciemny (HERO_IMG nie dotyczy, patrz hero-dark.mp4
+// nizej) bez zmian.
 document.querySelectorAll('#navSeal').forEach(el=> el.src = SEAL_IMG);
 // Jasna wersja (#heroImg) ustawiana raz - jej .src juz sie nie zmienia z motywem
 // (prompt-archiwum-wideo-swieca-hero.md: tryb ciemny to teraz #heroVideo, OSOBNY
