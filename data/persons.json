@@ -3,7 +3,12 @@
     {
       "id": "person_adam-mickiewicz_msx888z6",
       "name": "Adam Mickiewicz",
-      "note": ""
+      "note": "",
+      "bio": {
+        "bodyHtml": "<em>Polish sophisticated art-pop</em> jazz duet, i<strong>ntimate male and female vocals</strong>, poetic conversational singing, subtle emotional tension between two voices, warm acoustic piano, upright bass, delicate acoustic guitar, brushed drums, atmospheric percussion, sophisticated jazz harmonies, subtle world-music influences, spacious cinematic arrangement, melancholic and contemplative mood, warm organic analog production, expressive pauses, natural breathing, restrained verses gradually developing into an emotional harmonious chorus, elegant and deeply atmospheric, timeless Polish art-pop.",
+        "status": "draft",
+        "bodyHtmlPrevious": "<em>Polish sophisticated art-pop</em> jazz duet, i<strong>ntimate male and female vocals</strong>, poetic conversational singing, subtle emotional tension between two voices, warm acoustic piano, upright bass, delicate acoustic guitar, brushed drums, atmospheric percussion, sophisticated jazz harmonies, subtle world-music influences, spacious cinematic arrangement, melancholic and contemplative mood, warm organic analog production, expressive pauses, natural breathing, restrained verses gradually developing into an emotional harmonious chorus, elegant and deeply atmospheric, timeless Polish art-pop."
+      }
     },
     {
       "id": "person_henry-de-lubac_msx87seb",
