@@ -46,13 +46,33 @@
      - --line-bright: 3.17:1/3.55:1 → spadło do 1.38:1/1.94:1 (obramowanie .hero/.book-cover
        już nieledwie niewidoczne), zamiast ciepłego brązu przestawione na głęboki, spójny
        z --bg niebieski #3e6d79 (3.74:1 vs --bg, 5.33:1 vs --surface)
-   --ink/--gold-bright/--wine-bright NIE zmienione — nadal mieszczą się z zapasem (odpowiednio
-   10.41:1, 4.70:1, 4.50:1 na nowym --bg) i ciepłe złoto/bordo na chłodnym błękicie czyta się
-   dobrze (klasyczne zestawienie, nie kolizja). */
+   --gold-bright/--wine-bright NIE zmienione — nadal mieszczą się z zapasem (4.70:1, 4.50:1 na
+   nowym --bg) i ciepłe złoto/bordo na chłodnym błękicie czyta się dobrze (klasyczne
+   zestawienie, nie kolizja).
+
+   prompt-archiwum-rozdzielenie-kolorow-tekstu.md: powyższy --ink (wtedy #2b2013, brąz dobrany
+   pod ciepły beż) był jednym, wspólnym kolorem dla NAWIGACJI/TYTUŁÓW/ZWYKŁEGO TEKSTU (patrz
+   .nav-item/.article-title/.az-term/etc. niżej) — ale NIE dla marki (.nav-logo ma od dawna
+   własny --gold-bright) ani dla sygnatury (.sygnatura ma od dawna własny --gold-dim,
+   sprawdzone Krok 0 tej tury: to false premise promptu, rozdzielenie tych dwóch ról już
+   istniało). Zmienione: --ink → #1a1a1a (blisko czerni, nie czysta #000) — świadomie TA SAMA
+   wartość co --content-ink obszaru treści artykułu niżej, więc powłoka i treść po zejściu do
+   artykułu czytają się jako jedna, spójna czerń, nie dwa różne odcienie (11.38:1 na --bg, z
+   dużym zapasem).
+   Przy tej samej rundzie audytu znaleziony i poprawiony osobny, PRE-ISTNIEJĄCY błąd: --gold-dim
+   (sygnatura, keyword-tag, book/pl-thumb-placeholder — wszystko to TEKST) dawał tu tylko
+   3.81:1 na nowym --bg, poniżej 4.5:1 AA — poprzedni komentarz w repo admina (tura błękitu)
+   mylnie zakładał, że w archiwum-public --gold-dim nigdy nie jest tekstem (nieprawda, patrz
+   wyżej), więc tu w ogóle nie doprecyzowano. Naprawione do #634c22 (5.31:1) — TA SAMA wartość,
+   którą admin już miał z innego powodu (tam .sygnatura wymagało tego wprost) — oba repo mają
+   teraz identyczny, jeden kanoniczny odcień sygnatury zamiast przypadkowo różnych.
+   Plakietki statusu (roboczy/opublikowany/brak korpusu) istnieją tylko w panelu admina — już
+   mają własne, odrębne kolory (--gold-bright/--teal/--wine-bright), nie dziedziczą --ink,
+   potwierdzone tam że nadal dobrze komponują się z nowym tłem i nową czernią. */
 :root[data-theme="light"]{
   --bg:#aad9e2; --surface:#f1f8f9; --surface2:#cfebef; --line:#bee0e6; --line-bright:#3e6d79;
-  --gold:#7d5f28; --gold-bright:#6e5320; --gold-dim:#7c612d;
-  --ink:#2b2013; --muted:#5c5140; --wine:#7a2b21; --wine-bright:#9c3a28;
+  --gold:#7d5f28; --gold-bright:#6e5320; --gold-dim:#634c22;
+  --ink:#1a1a1a; --muted:#5c5140; --wine:#7a2b21; --wine-bright:#9c3a28;
   --nav-grad-1:#f6fafb; --nav-grad-2:#cfebef;
 }
 /* Paleta obszaru czytania artykułu — prompt-archiwum-marmurowa-paleta-tresci.md, wartości
