@@ -17,7 +17,12 @@
 <title>Archiwum Wielkiej Apostazji</title>
 <link rel="alternate" type="application/rss+xml" title="Archiwum Wielkiej Apostazji — nowe artykuły" href="data/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Special+Elite&family=Courier+Prime:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- prompt-archiwum-czcionka-maszynopis.md: Inter usunięty z importu — po tej turze font-family:'Inter'
+     nie występuje już NIGDZIE w tym pliku (Krok 0: dwa jedyne miejsca, html,body i .btn, oba
+     przestawione na Courier Prime), więc dalsze ładowanie nieużywanego webfontu byłoby zbędnym
+     żądaniem sieciowym. Fraunces zostaje w imporcie — nadal używany w .art-body/.art-footnotes
+     h3/.art-biblio h3 (treść artykułu, świadomie nietknięta tą turą). -->
 <style>
 :root{
   --bg:#15120d; --surface:#1f1a13; --surface2:#2a2318; --line:#3d3524; --line-bright:#5a4d31;
@@ -119,26 +124,43 @@
   --content-ink:#1a1a1a; --content-muted:#5c5c5c; --content-line:#8c8c8c;
 }
 *{box-sizing:border-box;}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;}
+/* prompt-archiwum-czcionka-maszynopis.md: Krok 0 znalazl trzy dzisiejsze fonty — Fraunces
+   (naglowki/marka), Inter (reszta UI, tylko tu i .btn — usuniety, patrz import wyzej), i
+   JetBrains Mono (.sygnatura/.breadcrumb/.keyword-tag/.cite-box/liczniki w grafie i osi czasu)
+   swiadomie ZOSTAWIONY BEZ ZMIAN — to juz odrebna, techniczna tozsamosc (sygnatury, liczniki,
+   referencje), nie koliduje z nowa czcionka maszynopisowa, a rozroznienie miedzy "pieczatka"
+   (JetBrains Mono) a "tekst pisany na maszynie" (Special Elite/Courier Prime) wzmacnia klimat
+   archiwum, nie osłabia go.
+   Domyslny font powloki (ten, tutaj) to Courier Prime, nie Special Elite — Special Elite ma
+   swiadomie nierowne, "drzace" ksztalty liter zaprojektowane pod KROTKIE, DUZE naglowki (tam,
+   gdzie ten efekt czyta sie jako charakter, nie usterka); w gestszym/drobniejszym tekscie UI
+   (etykiety pol, .hint, opisy, .book-desc — wszystko co dziedziczy z tego defaultu, plus
+   .article-title/.graph-node-link/placeholdery okladek/.btn z wlasnymi regulkami nizej) byloby
+   to nieczytelne. Podzial zweryfikowany wizualnie po zaimplementowaniu (zrzuty ekranu obu
+   motywow) — Special Elite tylko przy .nav-logo/#topbar h2/h1.pagetitle/.zespol-title/
+   .az-letter/.graph-focus-name/.book-title/.timeline-*, wszystko inne (w tym .article-title —
+   tytuly artykulow bywaja dlugie, czytane w liscie, nie jednorazowo jak sekcja formularza) na
+   Courier Prime. */
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Courier Prime',monospace;}
 #shell{display:flex;height:100vh;}
 #nav{width:210px;min-width:210px;background:linear-gradient(180deg,var(--nav-grad-1),var(--nav-grad-2));color:var(--ink);display:flex;flex-direction:column;padding:18px 0;border-right:1px solid var(--line);}
 .nav-logo-row{display:flex;align-items:center;gap:10px;padding:0 18px 10px;}
 .nav-seal{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
-.nav-logo{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--nav-logo-color);}
+.nav-logo{font-family:'Special Elite',monospace;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--nav-logo-color);}
 .nav-sub{padding:0 18px 14px;font-size:10px;color:var(--muted);border-bottom:1px solid var(--line);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase;}
 .nav-item{padding:10px 18px;font-size:13px;cursor:pointer;opacity:.78;border-left:3px solid transparent;color:var(--ink);}
 .nav-item:hover{background:rgba(201,169,97,.08);opacity:1;}
 .nav-item.active{opacity:1;border-left-color:var(--gold);background:rgba(201,169,97,.12);font-weight:600;color:var(--gold-bright);}
 #content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
 #topbar{display:flex;align-items:center;gap:14px;padding:10px 22px;border-bottom:1px solid var(--line);background:var(--surface);}
-#topbar h2{font-family:'Fraunces',serif;font-size:16px;margin:0;font-weight:600;color:var(--gold-bright);}
+#topbar h2{font-family:'Special Elite',monospace;font-size:16px;margin:0;font-weight:600;color:var(--gold-bright);}
 .spacer{flex:1;}
 #themeToggleBtn{display:flex;align-items:center;justify-content:center;padding:7px;line-height:0;}
 .module{flex:1;overflow:auto;padding:26px 32px;display:none;max-width:860px;}
 .module.active{display:block;}
-.btn{border:1px solid var(--line-bright);background:var(--surface2);color:var(--ink);padding:7px 13px;border-radius:5px;font-size:12.5px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:500;text-decoration:none;display:inline-block;}
+.btn{border:1px solid var(--line-bright);background:var(--surface2);color:var(--ink);padding:7px 13px;border-radius:5px;font-size:12.5px;cursor:pointer;font-family:'Courier Prime',monospace;font-weight:500;text-decoration:none;display:inline-block;}
 .btn:hover{border-color:var(--gold);color:var(--gold-bright);}
-h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:var(--gold-bright);letter-spacing:.01em;}
+h1.pagetitle{font-family:'Special Elite',monospace;font-size:24px;margin:0 0 4px;color:var(--gold-bright);letter-spacing:.01em;}
 .pagesub{color:var(--muted);font-size:13px;margin:0 0 20px;line-height:1.5;}
 .hint{font-size:11.5px;color:var(--muted);line-height:1.5;}
 .card{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:16px 18px;}
@@ -159,16 +181,16 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 .breadcrumb span{cursor:pointer;}
 .breadcrumb span:hover{color:var(--gold-bright);}
 .zespol-group{margin-bottom:22px;}
-.zespol-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;color:var(--gold-bright);margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:6px;}
+.zespol-title{font-family:'Special Elite',monospace;font-size:16px;font-weight:600;color:var(--gold-bright);margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:6px;}
 .article-row{padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer;}
 .article-row:hover .article-title{color:var(--gold-bright);}
-.article-title{font-family:'Fraunces',serif;font-size:14.5px;color:var(--ink);}
+.article-title{font-family:'Courier Prime',monospace;font-size:14.5px;color:var(--ink);}
 .article-meta{font-size:11px;color:var(--muted);margin-top:2px;}
 .keyword-tag{display:inline-block;background:var(--surface2);border:1px solid var(--line-bright);color:var(--gold-dim);font-size:10.5px;padding:2px 8px;border-radius:10px;margin:0 4px 4px 0;font-family:'JetBrains Mono',monospace;cursor:pointer;}
 .keyword-tag:hover{background:var(--gold);color:#20180c;border-color:var(--gold);}
 
 /* indeks A-Z */
-.az-letter{font-family:'Fraunces',serif;font-size:20px;color:var(--wine-bright);margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.az-letter{font-family:'Special Elite',monospace;font-size:20px;color:var(--wine-bright);margin:18px 0 8px;border-bottom:1px solid var(--line);padding-bottom:4px;}
 .az-term{padding:5px 0;font-size:13.5px;cursor:pointer;color:var(--ink);}
 .az-term:hover{color:var(--gold-bright);}
 .az-term .az-count{color:var(--muted);font-size:11px;font-family:'JetBrains Mono',monospace;}
@@ -207,6 +229,15 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 @media (prefers-reduced-motion: reduce){
   .art-seal-wrap .art-seal, .art-seal-wrap::after{ transition:none; }
 }
+/* prompt-archiwum-czcionka-maszynopis.md: .art-body i jego towarzyszace elementy tresci
+   (footnotes/biblio, w tym ich h3) swiadomie NIETKNIETE — zachowuja Fraunces. Caly reszta
+   powloki (nawigacja/marka/naglowki/przyciski/etykiety) przeszla na czcionke maszynopisowa
+   (Special Elite dla krotkich, duzych naglowkow; Courier Prime dla gestszego/drobniejszego
+   tekstu UI, patrz uzasadnienie przy html,body wyzej) — dlugie artykuly teologiczne z
+   przypisami maja zostac wygodne do czytania, nie migrowac na czcionke o stalej szerokosci
+   znakow wewnatrz samej tresci. Wewnetrzne h1-h4 w faktycznej tresci artykulu (renderowane
+   przez innerHTML wewnatrz #articleBody) nie maja wlasnej regulki — dziedzicza Fraunces po
+   .art-body, wiec tez pozostaja bez zmian. */
 .art-body{font-family:'Fraunces',serif;font-size:15.5px;line-height:1.7;color:var(--content-ink);background-image:var(--content-bg);background-size:100% auto;background-position:top center;background-repeat:repeat-y;border:1px solid var(--content-line);border-radius:8px;padding:22px 26px;}
 .art-body img{max-width:100%;height:auto;display:block;margin:14px auto;border-radius:4px;}
 .art-body blockquote{border-left:3px solid var(--content-line);background:rgba(140,140,140,.08);padding:6px 14px;font-style:italic;color:var(--content-muted);margin:0 0 1em;border-radius:0 4px 4px 0;}
@@ -221,10 +252,10 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 .graph-index{max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:10px 14px;margin-bottom:18px;}
 .graph-focus{border:1px solid var(--line-bright);border-radius:8px;background:var(--surface);padding:16px 18px;}
 .graph-focus-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
-.graph-focus-name{font-family:'Fraunces',serif;font-size:19px;color:var(--gold-bright);margin:0;}
+.graph-focus-name{font-family:'Special Elite',monospace;font-size:19px;color:var(--gold-bright);margin:0;}
 .graph-rel-group{margin-bottom:14px;}
 .graph-rel-heading{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px;}
-.graph-node-link{display:inline-block;font-family:'Fraunces',serif;font-size:14px;color:var(--ink);cursor:pointer;padding:3px 0;margin-right:4px;}
+.graph-node-link{display:inline-block;font-family:'Courier Prime',monospace;font-size:14px;color:var(--ink);cursor:pointer;padding:3px 0;margin-right:4px;}
 .graph-node-link:hover{color:var(--gold-bright);}
 .graph-relation-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:4px 0;}
 .graph-relation-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--wine-bright);cursor:pointer;border-bottom:1px dotted var(--wine-bright);}
@@ -236,11 +267,11 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 .timeline-epoch-row{display:flex;gap:10px;flex-wrap:wrap;}
 .timeline-epoch-block{flex:1 1 150px;min-width:150px;border:1px solid var(--line-bright);border-radius:8px;background:var(--surface);padding:16px 12px;text-align:center;cursor:pointer;}
 .timeline-epoch-block:hover{border-color:var(--gold);}
-.timeline-epoch-block .tl-name{font-family:'Fraunces',serif;font-size:14px;color:var(--gold-bright);}
+.timeline-epoch-block .tl-name{font-family:'Special Elite',monospace;font-size:14px;color:var(--gold-bright);}
 .timeline-epoch-block .tl-count{font-family:'JetBrains Mono',monospace;font-size:22px;color:var(--ink);margin-top:6px;}
 .timeline-epoch-block .tl-range{font-size:10.5px;color:var(--muted);margin-top:4px;}
 .timeline-decade-group{margin-bottom:18px;}
-.timeline-decade-heading{font-family:'Fraunces',serif;font-size:15px;color:var(--gold-bright);border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:8px;}
+.timeline-decade-heading{font-family:'Special Elite',monospace;font-size:15px;color:var(--gold-bright);border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:8px;}
 .timeline-year-row{display:flex;gap:8px;flex-wrap:wrap;}
 .timeline-year-chip{border:1px solid var(--line-bright);border-radius:6px;background:var(--surface);padding:8px 12px;cursor:pointer;font-size:13px;text-align:center;min-width:64px;}
 .timeline-year-chip:hover{border-color:var(--gold);}
@@ -251,8 +282,8 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 /* książki */
 .book-card{display:flex;gap:14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;margin-bottom:12px;}
 .book-cover{width:76px;height:108px;min-width:76px;border-radius:4px;object-fit:cover;background:var(--surface2);border:1px solid var(--line-bright);box-shadow:0 3px 10px rgba(0,0,0,.35);}
-.book-cover-placeholder{width:76px;height:108px;min-width:76px;border-radius:4px;background:linear-gradient(160deg,var(--surface2),var(--bg));border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;color:var(--gold-dim);font-size:11px;text-align:center;padding:6px;}
-.book-title{font-family:'Fraunces',serif;font-size:15.5px;color:var(--gold-bright);margin:0 0 2px;}
+.book-cover-placeholder{width:76px;height:108px;min-width:76px;border-radius:4px;background:linear-gradient(160deg,var(--surface2),var(--bg));border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:'Courier Prime',monospace;color:var(--gold-dim);font-size:11px;text-align:center;padding:6px;}
+.book-title{font-family:'Special Elite',monospace;font-size:15.5px;color:var(--gold-bright);margin:0 0 2px;}
 .book-author{font-size:12px;color:var(--muted);margin-bottom:6px;}
 .book-desc{font-size:12.5px;color:var(--ink);line-height:1.5;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .book-formats{display:flex;gap:6px;flex-wrap:wrap;}
@@ -261,7 +292,7 @@ h1.pagetitle{font-family:'Fraunces',serif;font-size:24px;margin:0 0 4px;color:va
 .playlist-card{border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:14px;margin-bottom:12px;}
 .playlist-head{display:flex;gap:14px;}
 .pl-thumb{width:150px;min-width:150px;aspect-ratio:16/9;border-radius:5px;object-fit:cover;background:var(--surface2);border:1px solid var(--line-bright);}
-.pl-thumb-placeholder{width:150px;min-width:150px;aspect-ratio:16/9;border-radius:5px;background:linear-gradient(160deg,var(--surface2),var(--bg));border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;color:var(--gold-dim);font-size:11px;text-align:center;padding:6px;}
+.pl-thumb-placeholder{width:150px;min-width:150px;aspect-ratio:16/9;border-radius:5px;background:linear-gradient(160deg,var(--surface2),var(--bg));border:1px solid var(--line-bright);display:flex;align-items:center;justify-content:center;font-family:'Courier Prime',monospace;color:var(--gold-dim);font-size:11px;text-align:center;padding:6px;}
 .playlist-embed{margin-top:12px;border-radius:6px;overflow:hidden;border:1px solid var(--line-bright);}
 .playlist-embed iframe{width:100%;aspect-ratio:16/9;display:block;border:0;}
 
