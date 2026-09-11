@@ -26,13 +26,34 @@
   --nav-grad-1:#1a160f; --nav-grad-2:#100d09;
 }
 /* Tryb jasny: te same role kolorów (tło/karta/tekst/akcent), przemyślane osobno pod kątem
-   kontrastu na jasnym pergaminowym tle — nie proste odwrócenie jasności. Zweryfikowane
-   względem WCAG (stosunek kontrastu ≥4.5:1 dla tekstu, ≥3:1 dla obramowań/dużego tekstu). */
+   kontrastu na jasnym tle — nie proste odwrócenie jasności. Zweryfikowane względem WCAG
+   (stosunek kontrastu ≥4.5:1 dla tekstu, ≥3:1 dla obramowań istotnych do rozpoznania granicy
+   elementu/dużego tekstu).
+   prompt-archiwum-jasny-motyw-blekit.md: beż/ecru oceniony jako "przaśny i tandetny",
+   zastąpiony stonowanym, pudrowym błękitem — --bg to dosłownie kolor z referencyjnego zrzutu
+   (inspiracja kolorystyczna, nie kopiowanie układu/treści innej strony), #AAD9E2, bez korekty
+   (10.41:1 z --ink, więcej niż wystarczająco). --surface/--surface2/--line/--nav-grad-*
+   dobrane jako tony tego samego odcienia (spójna, jednolicie niebieska powłoka, ten sam
+   wzorzec co dawniej — jaśniejsza "kartka" nad tłem, głębszy ton dla plakietek/nav-grad-2) —
+   --surface i --line celowo nisko-kontrastowe względem --bg (odpowiednio 1.42:1, 1.09:1),
+   dokładnie jak w starej, beżowej wersji (tam 1.12:1 / 1.28:1) — separacja kart opiera się na
+   obramowaniu, nie na kontraście wypełnienia, to nie regresja.
+   Chłodniejsze tło zmieniło kontrast części sąsiednich, ciepłych kolorów (przeliczone
+   programowo, nie z ręki):
+     - --muted: 4.10:1 → 4.5:1 nie starczało (tekst), przyciemnione #6b5f45 → #5c5140 (5.07:1)
+     - --gold: 3.12:1 → 2.45:1 jako obramowanie (≥3:1 potrzebne), przyciemnione #a17f3a →
+       #7d5f28 (3.88:1)
+     - --line-bright: 3.17:1/3.55:1 → spadło do 1.38:1/1.94:1 (obramowanie .hero/.book-cover
+       już nieledwie niewidoczne), zamiast ciepłego brązu przestawione na głęboki, spójny
+       z --bg niebieski #3e6d79 (3.74:1 vs --bg, 5.33:1 vs --surface)
+   --ink/--gold-bright/--wine-bright NIE zmienione — nadal mieszczą się z zapasem (odpowiednio
+   10.41:1, 4.70:1, 4.50:1 na nowym --bg) i ciepłe złoto/bordo na chłodnym błękicie czyta się
+   dobrze (klasyczne zestawienie, nie kolizja). */
 :root[data-theme="light"]{
-  --bg:#f2ead6; --surface:#fbf7ec; --surface2:#ece0c2; --line:#ddd0ab; --line-bright:#9c7f3f;
-  --gold:#a17f3a; --gold-bright:#6e5320; --gold-dim:#8a6c33;
-  --ink:#2b2013; --muted:#6b5f45; --wine:#7a2b21; --wine-bright:#9c3a28;
-  --nav-grad-1:#f8f0dc; --nav-grad-2:#ece0c2;
+  --bg:#aad9e2; --surface:#f1f8f9; --surface2:#cfebef; --line:#bee0e6; --line-bright:#3e6d79;
+  --gold:#7d5f28; --gold-bright:#6e5320; --gold-dim:#7c612d;
+  --ink:#2b2013; --muted:#5c5140; --wine:#7a2b21; --wine-bright:#9c3a28;
+  --nav-grad-1:#f6fafb; --nav-grad-2:#cfebef;
 }
 /* Paleta obszaru czytania artykułu — prompt-archiwum-marmurowa-paleta-tresci.md, wartości
    poprawione w prompt-archiwum-biala-paleta-tresci.md — pierwsza, marmurowa próba (płaski
