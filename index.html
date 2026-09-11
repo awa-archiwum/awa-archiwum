@@ -24,6 +24,10 @@
   --gold:#c9a961; --gold-bright:#e6c988; --gold-dim:#8b7442;
   --ink:#ece6d6; --muted:#a89878; --wine:#7a2e26; --wine-bright:#a3453a;
   --nav-grad-1:#1a160f; --nav-grad-2:#100d09;
+  --nav-logo-color:#e6c988; /* prompt-archiwum-naprawa-wordmark.md: sama wartosc --gold-bright
+    tego motywu, powtorzona tutaj (nie var(--gold-bright) posrednio) zeby .nav-logo mial wlasna,
+    dedykowana zmienna niezalezna od wspoldzielonej --gold-bright (ktora w trybie jasnym idzie
+    teraz na czarny) - tryb ciemny ma wygladac dokladnie tak samo jak wczesniej. */
 }
 /* Tryb jasny: te same role kolorów (tło/karta/tekst/akcent), przemyślane osobno pod kątem
    kontrastu na jasnym tle — nie proste odwrócenie jasności. Zweryfikowane względem WCAG
@@ -68,12 +72,24 @@
    teraz identyczny, jeden kanoniczny odcień sygnatury zamiast przypadkowo różnych.
    Plakietki statusu (roboczy/opublikowany/brak korpusu) istnieją tylko w panelu admina — już
    mają własne, odrębne kolory (--gold-bright/--teal/--wine-bright), nie dziedziczą --ink,
-   potwierdzone tam że nadal dobrze komponują się z nowym tłem i nową czernią. */
+   potwierdzone tam że nadal dobrze komponują się z nowym tłem i nową czernią.
+
+   prompt-archiwum-naprawa-wordmark.md: dokończenie powyższego — .nav-logo (wordmark "Archiwum
+   Wielkiej Apostazji") faktycznie renderował się przez --gold-bright, nie --ink (Krok 0
+   poprzedniej tury to poprawnie ustalił), więc zmiana samego --ink zostawiła wordmark złotym.
+   Krok 0 TEJ tury: --gold-bright ma mnóstwo innych, świadomie zachowanych użyć w trybie jasnym
+   (nagłówki stron/sekcji h1.pagetitle/.zespol-title/.graph-focus-name/.timeline-*, stany hover
+   .btn/.breadcrumb/.article-title/.az-term/.graph-node-link, plakietka statusu roboczy w
+   panelu admina) — zmiana samej --gold-bright zgasiłaby złoto tam wszędzie, więc zamiast tego
+   dedykowana --nav-logo-color (wartość #e6c988 w bare :root wyżej = ta sama co --gold-bright
+   ciemnego motywu, więc tryb ciemny wygląda dokładnie jak przedtem) zastosowana WYŁĄCZNIE do
+   .nav-logo. Tu, w trybie jasnym: #1a1a1a — ta sama czerń co --ink (11.38:1 na --bg, ten sam
+   wynik co dla --ink, bo to dosłownie ta sama wartość). */
 :root[data-theme="light"]{
   --bg:#aad9e2; --surface:#f1f8f9; --surface2:#cfebef; --line:#bee0e6; --line-bright:#3e6d79;
   --gold:#7d5f28; --gold-bright:#6e5320; --gold-dim:#634c22;
   --ink:#1a1a1a; --muted:#5c5140; --wine:#7a2b21; --wine-bright:#9c3a28;
-  --nav-grad-1:#f6fafb; --nav-grad-2:#cfebef;
+  --nav-grad-1:#f6fafb; --nav-grad-2:#cfebef; --nav-logo-color:#1a1a1a;
 }
 /* Paleta obszaru czytania artykułu — prompt-archiwum-marmurowa-paleta-tresci.md, wartości
    poprawione w prompt-archiwum-biala-paleta-tresci.md — pierwsza, marmurowa próba (płaski
@@ -108,7 +124,7 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family
 #nav{width:210px;min-width:210px;background:linear-gradient(180deg,var(--nav-grad-1),var(--nav-grad-2));color:var(--ink);display:flex;flex-direction:column;padding:18px 0;border-right:1px solid var(--line);}
 .nav-logo-row{display:flex;align-items:center;gap:10px;padding:0 18px 10px;}
 .nav-seal{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
-.nav-logo{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--gold-bright);}
+.nav-logo{font-family:'Fraunces',serif;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--nav-logo-color);}
 .nav-sub{padding:0 18px 14px;font-size:10px;color:var(--muted);border-bottom:1px solid var(--line);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase;}
 .nav-item{padding:10px 18px;font-size:13px;cursor:pointer;opacity:.78;border-left:3px solid transparent;color:var(--ink);}
 .nav-item:hover{background:rgba(201,169,97,.08);opacity:1;}
