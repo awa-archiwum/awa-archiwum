@@ -205,9 +205,26 @@
 html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:'Cormorant Garamond',serif;}
 #shell{display:flex;height:100vh;}
 #nav{width:210px;min-width:210px;background:linear-gradient(180deg,var(--nav-grad-1),var(--nav-grad-2));color:var(--ink);display:flex;flex-direction:column;padding:18px 0;border-right:1px solid var(--line);}
-.nav-logo-row{display:flex;align-items:center;gap:10px;padding:0 18px 10px;}
-.nav-seal{width:36px;height:36px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
-.nav-logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--nav-logo-color);}
+/* prompt-archiwum-powiekszony-emblemat-pionowy.md: Krok 0 potwierdzil dzisiejszy uklad —
+   flex-direction:row (domyslny), emblemat 36x36px obok napisu, z recznym <br> dzielacym tekst
+   na dwie linie (potrzebnym wtedy, bo obok malego obrazka bylo malo miejsca poziomo). Zmiana na
+   flex-direction:column + align-items:center — emblemat na gorze, wyrazny (72x72px, 2x
+   wiekszy, nadal ~40% szerokosci nawigacji po odjeciu paddingu, nie dominuje), napis pod nim,
+   wysrodkowany (text-align:center na .nav-logo, bo w kolumnie kazda linia tekstu centruje sie
+   sama w sobie tylko wzgledem NAJSZERSZEJ linii we wlasnym boxie, nie caly blok wzgledem
+   pieczeci powyzej — potrzebne oba: align-items:center NA WIERSZU I text-align:center NA
+   TEKSCIE).
+   Efekt uboczny sprawdzony bezposrednio (Playwright, realne wysokosci viewportu, nie tylko
+   zalozenie): pierwsza proba (96x96px, wieksze paddingi) dawala 75-155px przekroczenia wysokosci
+   #nav na ekranach 800/720px w panelu admina (dluzsza lista pozycji, 14 vs 8 w tym repo) —
+   zmierzone bezposrednio, ze przy takim przekroczeniu WSZYSTKIE pozycje menu (funkcjonalne,
+   klikalne) nadal miesza sie w widoku, cierpi tylko koncowka informacyjnego tekstu podpowiedzi
+   na samym dole panelu (nieinteraktywna, kosmetyczna strata). Dostrojone do 72x72px + ciasniejsze
+   marginesy/padding, zeby zminimalizowac te strate (37px przy 800px, 117px przy 720px) — na
+   typowych wspolczesnych wysokosciach ekranu (900px+) mieści się calkowicie bez przewijania. */
+.nav-logo-row{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 18px 10px;}
+.nav-seal{width:72px;height:72px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--nav-logo-color);text-align:center;}
 .nav-sub{padding:0 18px 14px;font-size:10px;color:var(--muted);border-bottom:1px solid var(--line);margin-bottom:8px;letter-spacing:.08em;text-transform:uppercase;}
 .nav-item{padding:10px 18px;font-size:15px;cursor:pointer;opacity:.78;border-left:3px solid transparent;color:var(--ink);}
 .nav-item:hover{background:rgba(201,169,97,.08);opacity:1;}
