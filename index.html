@@ -17,7 +17,7 @@
 <title>Archiwum Wielkiej Apostazji</title>
 <link rel="alternate" type="application/rss+xml" title="Archiwum Wielkiej Apostazji — nowe artykuły" href="data/feed.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Cormorant+Garamond:ital,wght@0,400;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- prompt-archiwum-czcionka-maszynopis.md: Inter usunięty z importu — po tej turze font-family:'Inter'
      nie występuje już NIGDZIE w tym pliku (Krok 0: dwa jedyne miejsca, html,body i .btn, oba
      przestawione na Courier Prime), więc dalsze ładowanie nieużywanego webfontu byłoby zbędnym
@@ -225,7 +225,17 @@ html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family
 .nav-logo-row{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 18px 10px;}
 .nav-seal{width:72px;height:72px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
 .nav-logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:700;font-size:15.5px;line-height:1.25;color:var(--nav-logo-color);text-align:center;}
-.nav-item{padding:10px 18px;font-size:15px;cursor:pointer;opacity:.78;border-left:3px solid transparent;color:var(--ink);}
+/* prompt-archiwum-pogrubienie-menu.md: Krok 0 sprawdzil dostepne wagi Cormorant Garamond
+   (import wyzej) — przed ta tura tylko 0,400 dla prostego (nie kursywnego) wariantu, ktorego
+   .nav-item uzywa (0,600/1,600/1,700 istnialy wylacznie dla kursywy). Poproszenie o
+   font-weight:600 bez dodania 0,600 do importu skutkowaloby syntetycznym (faux) pogrubieniem
+   przegladarki na bazie jedynej zaladowanej wagi 400, nie prawdziwym krojem bold — gorsza
+   jakosc renderowania niz prawdziwa waga. Dlatego dodane DOKLADNIE jedno brakujace ogniwo
+   (0,600) do JUZ istniejacego importu Cormorant Garamond, nie caly nowy font. Przy okazji
+   naprawia to PRE-ISTNIEJACY, niezauwazony wczesniej problem: .nav-item.active ponizej mial
+   font-weight:600 od samego poczatku (pierwsza tura Cormorant Garamond), wiec do teraz TEZ
+   renderowal sie przez faux-bold — teraz dostaje prawdziwa wage 600. */
+.nav-item{padding:10px 18px;font-size:15px;font-weight:600;cursor:pointer;opacity:.78;border-left:3px solid transparent;color:var(--ink);}
 .nav-item:hover{background:rgba(201,169,97,.08);opacity:1;}
 .nav-item.active{opacity:1;border-left-color:var(--gold);background:rgba(201,169,97,.12);font-weight:600;color:var(--gold-bright);}
 #content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
