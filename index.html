@@ -267,26 +267,11 @@ h1.pagetitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-weigh
 /* widok artykułu */
 .art-seal-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
 .art-seal{width:30px;height:30px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px var(--gold-dim);}
-/* prompt-archiwum-pieczec-przy-sygnaturze.md: poprawka umiejscowienia z poprzedniej tury —
-   "okolica nagłówka" (patrz .art-stamp niżej przy .art-body, historia niżej) była wizualnie
-   przypadkowa, niespójna między artykułami o różnej długości tytułu. Twarde zakotwiczenie:
-   .sygnatura-wrap (position:relative, inline-flex — czysty kontener pozycjonujący, bez
-   własnego wyglądu) opakowuje WYŁĄCZNIE .sygnatura (nie całą .art-seal-row, więc obecność
-   małej, okrągłej pieczęci #articleSeal obok nie wpływa na wyliczenie środka) — .art-stamp
-   pozycjonowany procentowo względem TEGO kontenera, więc efekt identyczny niezależnie od
-   długości tytułu/treści wokół, dokładnie jak prosił Zadanie (zweryfikowane bezpośrednio: środek
-   pieczęci i środek sygnatury pokrywają się co do piksela na obu dostępnych artykułach).
-   Stylistyka wizualna (obrót/przezroczystość/blend-mode/rozmiar) BEZ ZMIAN względem poprzedniej
-   tury — patrz pełne uzasadnienie tych właściwości przy .art-body niżej (historyczne, wciąż
-   aktualne dla samego wyglądu, tylko punkt zakotwiczenia się zmienił).
-   Pozycja: left:50%/top:50% + translate(-50%,-50%) — klasyczny wzorzec wyśrodkowania, środek
-   pieczęci pokrywa się ze środkiem tekstu sygnatury, ink bezpośrednio nakłada się na numer
-   referencyjny — "jakby stemplowała właśnie ten numer", tak jak na dokumentach urzędowych.
-   Pierwsza próba (translate Y liczone jako -55% WYSOKOŚCI SAMEJ PIECZĘCI, nie kontenera)
-   wieszała pieczęć niemal całkowicie nad wierszem sygnatury, ledwie go dotykając — złapane i
-   poprawione po realnym zrzucie ekranu, nie tylko z rachunku na papierze. */
-.sygnatura-wrap{position:relative;display:inline-flex;align-items:center;}
-.art-stamp{position:absolute;left:50%;top:50%;width:120px;height:120px;transform:translate(-50%,-50%) rotate(-12deg);opacity:.8;mix-blend-mode:multiply;pointer-events:none;z-index:2;}
+/* prompt-archiwum-usun-pieczec.md: eksperyment z dwóch poprzednich tur (duża pieczęć nałożona
+   na artykuł, potem przeniesiona na sygnaturę) wycofany całkowicie — użytkownik ocenił, że
+   zasłaniała informacje o dokumencie. .sygnatura-wrap/.art-stamp usunięte, .sygnatura wraca do
+   prostego znacznika bez opakowania. Mały emblemat #navSeal/#articleSeal (osobna, wcześniejsza
+   funkcja, assets/seal-stamp.jpg) NIETKNIĘTY — to inny mechanizm, zostaje. */
 
 /* prompt-archiwum-swieca-emblemat.md: emblemat w trybie ciemnym wyglada jak oswietlony
    wylacznie migoczacym plomieniem swiecy. Domyslnie (tryb ciemny, brak data-theme) WLACZONY -
@@ -331,16 +316,6 @@ h1.pagetitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-weigh
 .art-body img{max-width:100%;height:auto;display:block;margin:14px auto;border-radius:4px;}
 .art-body blockquote{border-left:3px solid var(--content-line);background:rgba(140,140,140,.08);padding:6px 14px;font-style:italic;color:var(--content-muted);margin:0 0 1em;border-radius:0 4px 4px 0;}
 .art-body sup{color:var(--content-muted);}
-/* prompt-archiwum-pieczec-na-artykule.md (historia): Krok 0 wtedy odkryl, ze
-   #articleBody.innerHTML jest CALKOWICIE nadpisywane przy kazdym renderze/edycji artykulu, wiec
-   pieczec nie moze byc dzieckiem .art-body — stad zyje gdzie indziej w DOM (dzis: .sygnatura-wrap
-   przy .art-seal-row, patrz wyzej), nie tutaj. Wyglad wizualny ustalony wtedy i NIETKNIETY od
-   tej pory: obrot -12deg (realne stemple nigdy nie sa proste), mix-blend-mode:multiply (tusz
-   wsiakniety w papier, nie nieprzezroczysta naklejka), pointer-events:none (nie blokuje
-   zaznaczania tekstu), rozmiar 120x120px. .art-body ma wlasna, niezalezna od motywu palete
-   (marmur/biel na BARE :root) — pieczec (gdziekolwiek by nie byla zakotwiczona) automatycznie
-   wyglada identycznie w obu motywach. Warunek wyswietlania (status/tryb edycji) bez zmian, patrz
-   setupArticleBodyEditor() w panelu admina. */
 .art-footnotes,.art-biblio{font-size:13px;color:var(--ink);margin-top:20px;}
 .art-footnotes h3,.art-biblio h3{font-family:'Fraunces',serif;font-size:15px;color:var(--gold-bright);}
 .cite-box{background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:11.5px;margin-top:20px;color:var(--muted);}
@@ -567,7 +542,7 @@ h1.pagetitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-weigh
     <div class="module" id="mod-article">
       <div id="articlePrintHeader" class="print-only"></div>
       <div class="breadcrumb" id="articleBreadcrumb"></div>
-      <div class="art-seal-row"><span class="art-seal-wrap"><img id="articleSeal" class="art-seal" alt="Pieczęć AWA"></span><span class="sygnatura-wrap"><div class="sygnatura" id="articleSygnatura"></div><img class="art-stamp" id="articleStamp" src="assets/seal-stamp.jpg" alt="" aria-hidden="true"></span></div>
+      <div class="art-seal-row"><span class="art-seal-wrap"><img id="articleSeal" class="art-seal" alt="Pieczęć AWA"></span><div class="sygnatura" id="articleSygnatura"></div></div>
       <h1 class="pagetitle" id="articleTitle"></h1>
       <p class="pagesub" id="articleMetaLine"></p>
       <div id="articleKeywords" style="margin-bottom:16px;"></div>
